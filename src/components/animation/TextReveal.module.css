@@ -1,0 +1,24 @@
+.word {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dim copy that holds the layout while the "ink" layer fades in on top of it */
+.ghost {
+  opacity: 0.16;
+}
+
+.ink {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -1,0 +1,90 @@
+.orbit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 260px;
+  height: 260px;
+}
+
+.ring {
+  position: absolute;
+  inset: -22px;
+  width: calc(100% + 44px);
+  height: calc(100% + 44px);
+  animation: spin 40s linear infinite;
+}
+
+.inscription {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.track {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  animation: spin 14s linear infinite reverse;
+}
+
+.satellite {
+  position: absolute;
+  top: -4px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 22px 2px rgba(201, 164, 93, 0.85);
+}
+
+.inner {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  width: 168px;
+  height: 168px;
+  border: 1px solid rgba(201, 164, 93, 0.45);
+  border-radius: 50%;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  align-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(2, 12, 29, 0.18);
+  transition:
+    background-color 0.6s var(--ease-out),
+    border-color 0.6s var(--ease-out),
+    color 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.innerRule {
+  width: 26px;
+  height: 1px;
+  background: var(--gold);
+  transition: width 0.6s var(--ease-out);
+}
+
+.orbit:hover .inner {
+  background: rgba(201, 164, 93, 0.16);
+  border-color: var(--gold);
+  color: #fff;
+  transform: scale(1.04);
+}
+
+.orbit:hover .innerRule {
+  width: 48px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

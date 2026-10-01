@@ -1,0 +1,289 @@
+/*
+ * Each card pins at --stack-top plus one --stack-step per card, so covered cards keep a
+ * labelled edge visible. Card height leaves room for every edge above it, so no card's
+ * content is ever hidden while it's pinned.
+ */
+.stack {
+  --stack-top: 112px;
+  --stack-step: 30px;
+  --card-h: clamp(420px, calc(100svh - var(--stack-top) - (var(--count) - 1) * var(--stack-step) - 40px), 600px);
+  position: relative;
+  list-style: none;
+  padding-bottom: 8vh;
+}
+
+.item {
+  position: sticky;
+  top: calc(var(--stack-top) + var(--i) * var(--stack-step));
+  height: var(--card-h);
+  margin-bottom: 18vh;
+}
+
+.item:last-child {
+  margin-bottom: 0;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(201, 164, 93, 0.28);
+  background: linear-gradient(135deg, #0c2349 0%, var(--navy) 52%, #041029 100%);
+  color: #fff;
+  box-shadow:
+    0 -22px 44px -26px rgba(2, 12, 29, 0.55),
+    0 44px 80px -54px rgba(2, 12, 29, 0.7);
+  transform-origin: 50% 0%;
+  will-change: transform;
+}
+
+/* The labelled edge that stays visible once later cards cover this one */
+.strip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: var(--stack-step);
+  padding-inline: clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.strip > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stripTags {
+  color: var(--gold);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-width: 0;
+  padding: clamp(24px, 2.8vw, 44px);
+}
+
+.number {
+  font-family: var(--font-numeric);
+  font-size: clamp(40px, 4vw, 64px);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--gold-light);
+}
+
+.number span {
+  margin-left: 6px;
+  font-size: 0.32em;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 3vw, 48px);
+  line-height: 0.96;
+  text-transform: uppercase;
+}
+
+.tags {
+  display: none;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 470px;
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--white-70);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gold);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fff;
+  transition: color 0.4s var(--ease-out);
+}
+
+.cta span {
+  display: inline-block;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.cta:hover {
+  color: var(--gold-light);
+}
+
+.cta:hover span {
+  transform: translateX(5px);
+}
+
+.media {
+  position: relative;
+  overflow: hidden;
+  background: var(--navy-deep);
+}
+
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(6, 23, 51, 0.45) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+.mediaInner {
+  position: absolute;
+  inset: 0;
+}
+
+.image {
+  object-fit: cover;
+  transition: transform 1.4s var(--ease-out);
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+/* Darkens a card as later cards stack over it */
+.dim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--navy-deep);
+  pointer-events: none;
+}
+
+/* Shorter screens: keep the deck compact by dropping the second paragraph */
+@media (max-height: 860px) {
+  .copy .extra {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .stack {
+    --stack-top: 84px;
+    --stack-step: 28px;
+    --card-h: clamp(470px, calc(100svh - var(--stack-top) - (var(--count) - 1) * var(--stack-step) - 20px), 640px);
+  }
+
+  .item {
+    margin-bottom: 12vh;
+  }
+
+  .strip {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+
+  .stripTags {
+    display: none;
+  }
+
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(140px, 34%) 1fr;
+  }
+
+  .media {
+    grid-row: 1;
+  }
+
+  .media::after {
+    background: linear-gradient(0deg, rgba(6, 23, 51, 0.5) 0%, transparent 40%);
+  }
+
+  .content {
+    justify-content: flex-start;
+    padding: 22px 22px 24px;
+  }
+
+  .number {
+    display: none;
+  }
+
+  .tags {
+    display: block;
+    margin-top: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .copy {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .copy p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .copy .extra {
+    display: none;
+  }
+
+  .cta {
+    margin-top: 18px;
+  }
+}
+
+/* Too short to pin a whole card: fall back to an ordinary scrolling list */
+@media (max-height: 720px) {
+  .item {
+    position: relative;
+    top: auto;
+    height: auto;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    height: auto;
+    min-height: 420px;
+    transform: none !important;
+  }
+
+  .dim {
+    opacity: 0 !important;
+  }
+}

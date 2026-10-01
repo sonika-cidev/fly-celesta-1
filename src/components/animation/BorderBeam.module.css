@@ -1,0 +1,22 @@
+/* Only the border ring is painted: border-box minus padding-box */
+.ring {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: var(--border-beam-width) solid transparent;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0) border-box;
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0) border-box;
+  mask-composite: exclude;
+}
+
+.beam {
+  position: absolute;
+  aspect-ratio: 1;
+  background: linear-gradient(to left, var(--color-from), var(--color-to), transparent);
+}

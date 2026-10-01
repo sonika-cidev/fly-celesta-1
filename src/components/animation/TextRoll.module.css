@@ -1,0 +1,36 @@
+.letter {
+  position: relative;
+  display: inline-block;
+  perspective: 10000px;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-block;
+  backface-visibility: hidden;
+}
+
+.front {
+  transform-origin: 50% 25%;
+}
+
+.back {
+  transform-origin: 50% 100%;
+}
+
+/* Invisible copy that reserves each letter's width */
+.ghost {
+  visibility: hidden;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

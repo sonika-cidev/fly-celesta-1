@@ -1,0 +1,33 @@
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.rule::before {
+  content: "";
+  flex: none;
+  width: 54px;
+  height: 1px;
+  background: currentColor;
+}
+
+.dark {
+  color: var(--gold-ink);
+}
+
+@media (max-width: 600px) {
+  .eyebrow {
+    gap: 12px;
+    letter-spacing: 0.26em;
+  }
+
+  .rule::before {
+    width: 34px;
+  }
+}

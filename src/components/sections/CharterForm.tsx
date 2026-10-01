@@ -1,0 +1,411 @@
+"use client";
+
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { submitCharterRequest } from "@/app/actions/charter-request";
+import {
+  AIRCRAFT_TYPES,
+  COUNTRY_CODES,
+  PREFILL_EVENT,
+  TRIP_TYPES,
+  validateCharter,
+  type AircraftType,
+  type CharterErrors,
+  type CharterFields,
+  type CharterPrefill,
+  type CharterRequestState,
+} from "@/lib/charter";
+import styles from "./CharterForm.module.css";
+
+const EASE_OUT = [0.2, 0.7, 0.2, 1] as const;
+const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
+
+const initialState: CharterRequestState = { status: "idle" };
+
+const emptyFields: CharterFields = {
+  aircraftType: "Private Jet",
+  tripType: "One Way",
+  from: "",
+  to: "",
+  departureDate: "",
+  returnDate: "",
+  passengers: "2",
+  name: "",
+  email: "",
+  countryCode: "+91",
+  phone: "",
+  requirements: "",
+};
+
+// The visitor's local date; empty during the server render so hydration always matches.
+const noopSubscribe = () => () => {};
+const useToday = () => useSyncExternalStore(noopSubscribe, () => new Date().toLocaleDateString("en-CA"), () => "");
+
+const iconProps = {
+  viewBox: "0 0 32 32",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.4,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+} as const;
+
+const aircraftIcons: Record<AircraftType, ReactNode> = {
+  Helicopter: (
+    <svg {...iconProps}>
+      <path d="M4 7h18M13 7v3" />
+      <path d="M6 15.5c0-3 2.4-5.5 5.5-5.5H15a4 4 0 0 1 4 4v1.5a2 2 0 0 1-2 2H8.5A2.5 2.5 0 0 1 6 15.5z" />
+      <path d="M19 13h8l1.5-3M8 21h11M10 17.5V21M16 17.5V21" />
+    </svg>
+  ),
+  "Private Jet": (
+    <svg {...iconProps}>
+      <path d="M16 3c1 0 1.7 1.2 1.7 2.6V12l10.3 6v2.4l-10.3-3.2v5.6l3 2.2V27L16 25.8 11.3 27v-2l3-2.2v-5.6L4 20.4V18l10.3-6V5.6C14.3 4.2 15 3 16 3z" />
+    </svg>
+  ),
+  Turboprop: (
+    <svg {...iconProps}>
+      <path d="M16 3c.9 0 1.5 1 1.5 2.3V12h10.5v2.6l-10.5 1.6v6.4l3 2V27L16 26l-4.5 1v-2.4l3-2v-6.4L4 14.6V12h10.5V5.3C14.5 4 15.1 3 16 3z" />
+      <path d="M8.5 9.5v5M23.5 9.5v5" />
+    </svg>
+  ),
+};
+
+export function CharterForm() {
+  // Remounting gives a clean form (and action state) for "plan another flight"
+  const [round, setRound] = useState(0);
+  return <CharterFormInner key={round} onReset={() => setRound((r) => r + 1)} />;
+}
+
+function CharterFormInner({ onReset }: { onReset: () => void }) {
+  const [state, formAction, pending] = useActionState(submitCharterRequest, initialState);
+  const [values, setValues] = useState<CharterFields>(emptyFields);
+  const [clientErrors, setClientErrors] = useState<CharterErrors>({});
+  const [edited, setEdited] = useState<ReadonlySet<keyof CharterFields>>(new Set());
+  const [swapTurns, setSwapTurns] = useState(0);
+  // The confirmation keeps the form's height so the page doesn't jump and it stays in view
+  const formRef = useRef<HTMLFormElement>(null);
+  const [lockedHeight, setLockedHeight] = useState<number>();
+  const today = useToday();
+  const uid = useId();
+  const fieldId = (name: keyof CharterFields) => `${uid}-${name}`;
+
+  // "Book this deal" buttons pre-select the aircraft and note the deal
+  useEffect(() => {
+    const onPrefill = (event: Event) => {
+      const { aircraftType, aircraft, rate } = (event as CustomEvent<CharterPrefill>).detail;
+      setValues((v) => ({
+        ...v,
+        aircraftType,
+        requirements: v.requirements.trim()
+          ? v.requirements
+          : `I'd like to book the ${aircraft} charter deal (${rate} per hour).`,
+      }));
+    };
+    window.addEventListener(PREFILL_EVENT, onPrefill);
+    return () => window.removeEventListener(PREFILL_EVENT, onPrefill);
+  }, []);
+
+  const update = (name: keyof CharterFields, value: string) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    setEdited((s) => new Set(s).add(name));
+    setClientErrors((errors) => {
+      if (!(name in errors)) return errors;
+      const next = { ...errors };
+      delete next[name];
+      return next;
+    });
+  };
+  const bind = (name: keyof CharterFields) => ({
+    id: fieldId(name),
+    name,
+    value: values[name],
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => update(name, e.target.value),
+  });
+
+  const serverErrors = state.status === "error" ? (state.errors ?? {}) : {};
+  const errorFor = (name: keyof CharterFields) => clientErrors[name] ?? (edited.has(name) ? undefined : serverErrors[name]);
+  const describe = (name: keyof CharterFields) =>
+    errorFor(name) ? { "aria-invalid": true, "aria-describedby": `${fieldId(name)}-error` } : {};
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const errors = validateCharter(values, today || undefined);
+    const invalid = Object.keys(errors) as (keyof CharterFields)[];
+    if (invalid.length > 0) {
+      e.preventDefault();
+      setClientErrors(errors);
+      document.getElementById(fieldId(invalid[0]))?.focus();
+      return;
+    }
+    setClientErrors({});
+    setEdited(new Set());
+    setLockedHeight(formRef.current?.offsetHeight);
+  };
+
+  const swapRoute = () => {
+    setValues((v) => ({ ...v, from: v.to, to: v.from }));
+    setSwapTurns((t) => t + 1);
+  };
+
+  const stepPassengers = (delta: number) => {
+    const current = Number.parseInt(values.passengers, 10) || 0;
+    update("passengers", String(Math.min(99, Math.max(1, current + delta))));
+  };
+
+  if (state.status === "success") {
+    return (
+      <motion.div
+        className={styles.success}
+        style={{ minHeight: lockedHeight }}
+        role="status"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: EASE_OUT }}
+      >
+        <svg className={styles.check} viewBox="0 0 64 64" aria-hidden="true">
+          <motion.circle
+            cx="32"
+            cy="32"
+            r="30"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.9, ease: EASE_OUT }}
+          />
+          <motion.path
+            d="M20 33l8 8 16-18"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ delay: 0.6, duration: 0.5, ease: EASE_OUT }}
+          />
+        </svg>
+        <h3 className={styles.successTitle}>Thank you, {state.firstName}.</h3>
+        <p className={styles.successText}>
+          Your charter request is with our team. We&rsquo;ll be in touch shortly with aircraft options and a quote.
+        </p>
+        <button type="button" className={styles.again} onClick={onReset}>
+          Plan another flight
+        </button>
+      </motion.div>
+    );
+  }
+
+  const hasClientErrors = Object.keys(clientErrors).length > 0;
+  const banner = hasClientErrors
+    ? "Please check the highlighted fields."
+    : state.status === "error"
+      ? state.message
+      : null;
+
+  return (
+    <form ref={formRef} className={styles.form} action={formAction} onSubmit={handleSubmit} noValidate>
+      <fieldset className={styles.group}>
+        <legend className={styles.legend}>Aircraft type</legend>
+        <div className={styles.types}>
+          {AIRCRAFT_TYPES.map((type) => {
+            const checked = values.aircraftType === type;
+            return (
+              <label key={type} className={styles.typeOption} data-checked={checked}>
+                <input
+                  type="radio"
+                  name="aircraftType"
+                  value={type}
+                  checked={checked}
+                  onChange={() => update("aircraftType", type)}
+                  className={styles.srInput}
+                />
+                {checked && <motion.span layoutId={`${uid}-type`} className={styles.typeHighlight} transition={SPRING} />}
+                <span className={styles.typeIcon} aria-hidden="true">
+                  {aircraftIcons[type]}
+                </span>
+                <span className={styles.typeLabel}>{type}</span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <div className={styles.row}>
+        <fieldset className={styles.group}>
+          <legend className={styles.legend}>Trip</legend>
+          <div className={styles.segmented}>
+            {TRIP_TYPES.map((trip) => {
+              const checked = values.tripType === trip;
+              return (
+                <label key={trip} className={styles.segment} data-checked={checked}>
+                  <input
+                    type="radio"
+                    name="tripType"
+                    value={trip}
+                    checked={checked}
+                    onChange={() => update("tripType", trip)}
+                    className={styles.srInput}
+                  />
+                  {checked && <motion.span layoutId={`${uid}-trip`} className={styles.segmentPill} transition={SPRING} />}
+                  <span className={styles.segmentLabel}>{trip}</span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <Field id={fieldId("passengers")} label="Passengers" error={errorFor("passengers")}>
+          <div className={styles.stepper}>
+            <button
+              type="button"
+              aria-label="Fewer passengers"
+              onClick={() => stepPassengers(-1)}
+              disabled={Number(values.passengers) <= 1}
+            >
+              −
+            </button>
+            <input {...bind("passengers")} {...describe("passengers")} inputMode="numeric" className={styles.stepperInput} />
+            <button type="button" aria-label="More passengers" onClick={() => stepPassengers(1)}>
+              +
+            </button>
+          </div>
+        </Field>
+      </div>
+
+      <div className={styles.route}>
+        <Field id={fieldId("from")} label="From" error={errorFor("from")}>
+          <input {...bind("from")} {...describe("from")} placeholder="Departure city" className={styles.input} />
+        </Field>
+        <motion.button
+          type="button"
+          className={styles.swap}
+          aria-label="Swap departure and arrival cities"
+          onClick={swapRoute}
+          animate={{ rotate: swapTurns * 180 }}
+          transition={{ type: "spring", stiffness: 240, damping: 18 }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />
+          </svg>
+        </motion.button>
+        <Field id={fieldId("to")} label="To" error={errorFor("to")}>
+          <input {...bind("to")} {...describe("to")} placeholder="Arrival city" className={styles.input} />
+        </Field>
+      </div>
+
+      <div className={styles.row}>
+        <Field id={fieldId("departureDate")} label="Departure date" error={errorFor("departureDate")}>
+          <input {...bind("departureDate")} {...describe("departureDate")} type="date" min={today || undefined} className={styles.input} />
+        </Field>
+        <AnimatePresence initial={false}>
+          {values.tripType === "Round Trip" && (
+            <motion.div
+              key="return"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ duration: 0.45, ease: EASE_OUT }}
+            >
+              <Field id={fieldId("returnDate")} label="Return date" error={errorFor("returnDate")}>
+                <input
+                  {...bind("returnDate")}
+                  {...describe("returnDate")}
+                  type="date"
+                  min={values.departureDate || today || undefined}
+                  className={styles.input}
+                />
+              </Field>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className={styles.row}>
+        <Field id={fieldId("name")} label="Full name" error={errorFor("name")}>
+          <input {...bind("name")} {...describe("name")} autoComplete="name" className={styles.input} />
+        </Field>
+        <Field id={fieldId("email")} label="Email" error={errorFor("email")}>
+          <input {...bind("email")} {...describe("email")} type="email" autoComplete="email" className={styles.input} />
+        </Field>
+      </div>
+
+      <Field id={fieldId("phone")} label="Phone" error={errorFor("phone")}>
+        <div className={styles.phone}>
+          <select {...bind("countryCode")} aria-label="Country code" className={styles.select}>
+            {COUNTRY_CODES.map((c) => (
+              <option key={c.code + c.label} value={c.code}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <input {...bind("phone")} {...describe("phone")} type="tel" autoComplete="tel-national" className={styles.input} />
+        </div>
+      </Field>
+
+      <Field id={fieldId("requirements")} label="Requirements (optional)">
+        <textarea
+          {...bind("requirements")}
+          rows={3}
+          placeholder="Luggage, special requests, flexible dates…"
+          className={`${styles.input} ${styles.textarea}`}
+        />
+      </Field>
+
+      <div className={styles.footer}>
+        <AnimatePresence>
+          {banner && (
+            <motion.p
+              key={banner}
+              role="alert"
+              className={styles.banner}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              {banner}
+            </motion.p>
+          )}
+        </AnimatePresence>
+        <button type="submit" className={styles.submit} disabled={pending}>
+          <span>{pending ? "Sending request…" : "Send request"}</span>
+          {pending ? <span className={styles.spinner} aria-hidden="true" /> : <span aria-hidden="true">→</span>}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+type FieldProps = {
+  id: string;
+  label: string;
+  error?: string;
+  children: ReactNode;
+};
+
+function Field({ id, label, error, children }: FieldProps) {
+  return (
+    <div className={`${styles.field} ${error ? styles.invalid : ""}`}>
+      <label htmlFor={id} className={styles.label}>
+        {label}
+      </label>
+      {children}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            id={`${id}-error`}
+            className={styles.error}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

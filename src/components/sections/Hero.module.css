@@ -1,0 +1,265 @@
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 720px;
+  overflow: hidden;
+  background: var(--navy-deep);
+  isolation: isolate;
+}
+
+.mediaLayer {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  animation: ken 16s var(--ease-out) forwards;
+}
+
+.image {
+  object-fit: cover;
+  /* Keep the helicopter in the upper right, clear of the headline */
+  object-position: 75% 40%;
+  filter: saturate(0.88) brightness(0.92);
+}
+
+@keyframes ken {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Navy grade + legibility gradients */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgba(2, 12, 29, 0.95) 0%, rgba(2, 12, 29, 0.66) 36%, rgba(2, 12, 29, 0.05) 72%),
+    linear-gradient(0deg, rgba(2, 12, 29, 0.9) 0%, rgba(2, 12, 29, 0.3) 30%, transparent 50%),
+    linear-gradient(180deg, rgba(2, 12, 29, 0.55) 0%, transparent 22%),
+    rgba(6, 23, 51, 0.28);
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
+}
+
+.content {
+  position: absolute;
+  left: calc(var(--gutter) + 2vw);
+  top: 52%;
+  translate: 0 -45%;
+  max-width: 920px;
+  padding-right: var(--gutter);
+}
+
+.title {
+  margin-top: 28px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(64px, 10.5vw, 168px);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.title em {
+  margin-left: 0.62em;
+}
+
+/* Gold leaf, applied per letter: background-clip on a parent can't reach transformed children */
+.goldChar {
+  background: linear-gradient(180deg, #f6e7c0 0%, #e2c98f 38%, #c9a45d 72%, #a37a36 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lede {
+  max-width: 440px;
+  margin-top: 40px;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.95;
+  color: var(--white-70);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 34px;
+  margin-top: 40px;
+}
+
+.orbit {
+  position: absolute;
+  right: 7vw;
+  bottom: 120px;
+  opacity: 0;
+  animation: fadeIn 1.6s var(--ease-out) 1.1s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.meta {
+  position: absolute;
+  left: calc(var(--gutter) + 2vw);
+  right: var(--gutter);
+  bottom: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white-50);
+}
+
+.metaLeft {
+  display: inline-flex;
+  align-items: center;
+}
+
+.metaLine {
+  display: inline-block;
+  width: 130px;
+  height: 1px;
+  margin-left: 18px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  transition: color 0.4s;
+}
+
+.scroll:hover {
+  color: var(--gold-light);
+}
+
+.scrollTrack {
+  position: relative;
+  width: 1px;
+  height: 46px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.scrollThumb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 18px;
+  background: var(--gold);
+  animation: drop 2.4s var(--ease-lux) infinite;
+}
+
+@keyframes drop {
+  from {
+    transform: translateY(-18px);
+  }
+  to {
+    transform: translateY(46px);
+  }
+}
+
+@media (max-width: 1280px) {
+  .orbit {
+    right: 4vw;
+    bottom: 96px;
+    scale: 0.8;
+    transform-origin: bottom right;
+  }
+}
+
+/* Portrait screens (phones and upright tablets): anchor the copy low, keep the sky clear */
+@media (orientation: portrait), (max-width: 760px) {
+  .image {
+    object-position: 86% 50%;
+  }
+
+  .scrim {
+    background:
+      linear-gradient(0deg, rgba(2, 12, 29, 0.97) 0%, rgba(2, 12, 29, 0.75) 42%, rgba(2, 12, 29, 0.1) 68%),
+      linear-gradient(180deg, rgba(2, 12, 29, 0.6) 0%, transparent 22%),
+      rgba(6, 23, 51, 0.25);
+  }
+
+  .content {
+    left: var(--gutter);
+    top: auto;
+    bottom: 110px;
+    translate: none;
+  }
+
+  .orbit {
+    display: none;
+  }
+
+  .meta {
+    left: var(--gutter);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: 680px;
+  }
+
+  .content {
+    bottom: 96px;
+  }
+
+  .title {
+    margin-top: 22px;
+    font-size: clamp(52px, 15vw, 84px);
+  }
+
+  .title em {
+    margin-left: 0.4em;
+  }
+
+  .lede {
+    margin-top: 26px;
+    font-size: 14px;
+  }
+
+  .actions {
+    margin-top: 30px;
+  }
+
+  .meta {
+    bottom: 26px;
+  }
+
+  .metaLine {
+    width: 60px;
+  }
+}
+
+@media (max-height: 760px) and (max-width: 760px) {
+  .lede {
+    display: none;
+  }
+}
