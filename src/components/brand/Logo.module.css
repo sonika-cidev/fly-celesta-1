@@ -1,8 +1,0 @@
-/* Width comes from --logo-w (overridable by a parent); height always derives from the native aspect ratio so the mark is never cropped. */
-.logo {
-  width: var(--logo-w);
-  height: auto;
-  max-width: 100%;
-  object-fit: contain;
-  user-select: none;
-}

@@ -1,9 +1,0 @@
-.bar {
-  position: fixed;
-  inset: 0 0 auto;
-  z-index: 70;
-  height: 2px;
-  transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--gold-ink), var(--gold) 55%, var(--gold-pale));
-  box-shadow: 0 0 12px rgba(201, 164, 93, 0.55);
-}
