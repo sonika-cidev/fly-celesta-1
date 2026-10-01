@@ -1,0 +1,127 @@
+/* Theme 2 — "Porcelain & Midnight": daylight surfaces, midnight ink, champagne accents */
+:root {
+  --paper: #f6f3ee;
+  --paper-deep: #ece6db;
+  --mist: #e8edf0;
+  --white: #ffffff;
+  --ink: #0f1b31;
+  --ink-soft: #2f3d55;
+  --muted: #687082;
+  --line: rgba(15, 27, 49, 0.12);
+  --line-strong: rgba(15, 27, 49, 0.24);
+
+  --gold: #b08d57;
+  --gold-deep: #8f6e3a;
+  --gold-soft: #dcc59b;
+
+  --night: #0b1528;
+  --night-raised: #13213b;
+  --on-night: #f3efe7;
+  --on-night-muted: rgba(243, 239, 231, 0.64);
+  --line-night: rgba(243, 239, 231, 0.13);
+
+  --font-serif: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-jost), system-ui, sans-serif;
+
+  --max: 1360px;
+  --gutter: clamp(20px, 5vw, 72px);
+  --section: clamp(96px, 11vw, 168px);
+  --radius-xl: 36px;
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --shadow-soft: 0 34px 70px -42px rgba(15, 27, 49, 0.42);
+  --shadow-card: 0 24px 50px -34px rgba(15, 27, 49, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Serif display with lining figures so model numbers stay legible */
+.serif {
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

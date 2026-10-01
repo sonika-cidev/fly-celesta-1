@@ -1,0 +1,18 @@
+.frame {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--paper-deep);
+}
+
+.zoom {
+  position: absolute;
+  inset: 0;
+}
+
+.drift {
+  position: absolute;
+  left: 0;
+  right: 0;
+  will-change: transform;
+}
