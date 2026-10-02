@@ -30,9 +30,14 @@ Follows the client's sitemap:
   [svg-captcha](https://github.com/produck/svg-captcha) (MIT) at `/api/captcha` — no third-party service. The answer
   never reaches the browser: the form receives a signed token, the server checks the answer on submit, and each question
   can be tried only once (expires after 30 minutes). A wrong answer stores nothing and shows a new question.
-- **Inquiry inbox** — every accepted submission is stored and listed at **`/admin`** (newest first, with date and time
-  in IST, contact details, charter details and message; filter by charter requests, enquiries or careers).
-  Sign in with the admin password.
+- **Validation** — the same rules run in the browser (errors appear as each field is left, and the first problem is
+  brought into view on submit) and again on the server, so nothing invalid is stored: names in letters only, a real
+  email address, phone numbers of the right length for the chosen country (10-digit mobiles for India), city or airport
+  names, departure and arrival not the same, dates from today up to 12 months ahead with the return after departure,
+  passenger limits per aircraft type, and message lengths. Names, routes and phone numbers are stored tidily.
+- **Inquiry inbox** — every accepted submission is stored and listed at **`/admin`** (newest first, 10 per page with
+  numbered pages, date and time in IST, contact details, charter details and message; filter by charter requests,
+  enquiries or careers). Sign in with the admin password.
 
 ## Environment variables
 

@@ -1,5 +1,5 @@
 // Shared by the general enquiry form (contact, service and career pages) and its server action.
-import { emailError, isCountryCode, nameError, phoneError, type FormState } from "./forms";
+import { capitalizeWords, emailError, formatPhone, messageError, nameError, phoneError, tidy, type FormState } from "./forms";
 
 export const INQUIRY_TOPICS = [
   "General enquiry",
@@ -40,17 +40,33 @@ export type InquiryState = FormState<keyof InquiryFields>;
 
 export const isInquiryTopic = (topic: string): topic is InquiryTopic => (INQUIRY_TOPICS as readonly string[]).includes(topic);
 
+/** Trims every field and collapses spaces in single-line ones — run before validating. */
+export function tidyInquiry(f: InquiryFields): InquiryFields {
+  return {
+    topic: tidy(f.topic),
+    name: tidy(f.name),
+    email: tidy(f.email),
+    countryCode: tidy(f.countryCode),
+    phone: tidy(f.phone),
+    message: f.message.trim(),
+  };
+}
+
 export function validateInquiry(f: InquiryFields): InquiryErrors {
   const errors: InquiryErrors = {};
-  if (!isInquiryTopic(f.topic)) errors.topic = "Choose a topic.";
+  if (!isInquiryTopic(f.topic)) errors.topic = "Choose what your enquiry is about.";
+  const message = messageError(f.message);
+  if (message) errors.message = message;
   const name = nameError(f.name);
   if (name) errors.name = name;
   const email = emailError(f.email);
   if (email) errors.email = email;
-  if (!isCountryCode(f.countryCode)) errors.phone = "Choose a country code.";
-  const phone = phoneError(f.phone, false);
+  const phone = phoneError(f.phone, f.countryCode, false);
   if (phone) errors.phone = phone;
-  if (f.message.length < 10) errors.message = "Please add a short message (at least 10 characters).";
-  else if (f.message.length > 4000) errors.message = "Use 4,000 characters or fewer.";
   return errors;
+}
+
+/** How a valid enquiry is stored: tidy capitals on the name, one phone format. */
+export function inquiryForStorage(f: InquiryFields) {
+  return { ...f, name: capitalizeWords(f.name), phone: formatPhone(f.phone, f.countryCode) };
 }

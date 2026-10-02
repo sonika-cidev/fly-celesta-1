@@ -20,15 +20,16 @@ type MathCaptchaProps = {
   /** Lets the parent form focus this field when it's missing. */
   inputId: string;
   error?: string;
-  /** Called as the visitor types, so the parent can clear an old error. */
-  onAnswer?: () => void;
+  /** Called with the answer as the visitor types (and with "" when the sum is replaced). */
+  onAnswer?: (answer: string) => void;
+  onBlur?: () => void;
 };
 
 /**
  * "What is 5 + 4?" — the sum is drawn on our server (see /api/captcha) and checked there
  * again on submit. The parent remounts this component (new `key`) to load a fresh question.
  */
-export function MathCaptcha({ inputId, error, onAnswer }: MathCaptchaProps) {
+export function MathCaptcha({ inputId, error, onAnswer, onBlur }: MathCaptchaProps) {
   const [round, setRound] = useState(0);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [failed, setFailed] = useState(false);
@@ -54,6 +55,7 @@ export function MathCaptcha({ inputId, error, onAnswer }: MathCaptchaProps) {
     setChallenge(null);
     setFailed(false);
     setAnswer("");
+    onAnswer?.("");
     setRound((r) => r + 1);
   };
 
@@ -83,11 +85,15 @@ export function MathCaptcha({ inputId, error, onAnswer }: MathCaptchaProps) {
           name={CAPTCHA_ANSWER_FIELD}
           value={answer}
           onChange={(e) => {
-            setAnswer(e.target.value.replace(/[^\d]/g, "").slice(0, 3));
-            onAnswer?.();
+            const next = e.target.value.replace(/\D/g, "").slice(0, 3);
+            setAnswer(next);
+            onAnswer?.(next);
           }}
+          onBlur={onBlur}
           inputMode="numeric"
+          maxLength={3}
           autoComplete="off"
+          aria-required="true"
           placeholder="?"
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}

@@ -118,15 +118,20 @@
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-items: end;
+  align-items: start;
   gap: 18px;
+}
+
+/* Height of a field label plus its gap, for controls that sit level with labelled inputs */
+.split > .segmented,
+.route > .swap {
+  margin-top: calc(11px * 1.7 + 7px);
 }
 
 /* One way / round trip */
 .segmented {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-self: end;
   padding: 5px;
   border-radius: 999px;
   background: var(--paper);
@@ -171,6 +176,19 @@
   flex-direction: column;
   gap: 7px;
   min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.counter {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .label {
@@ -247,7 +265,7 @@
 .route {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: end;
+  align-items: start;
   gap: 10px;
 }
 
@@ -256,7 +274,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  margin-bottom: 4px;
+  translate: 0 4px;
   border: 1px solid var(--line-strong);
   border-radius: 50%;
   background: var(--white);
@@ -586,9 +604,14 @@
     gap: 8px;
   }
 
-  .swap {
+  .split > .segmented {
+    margin-top: 0;
+  }
+
+  .route > .swap {
     justify-self: center;
     rotate: 90deg;
+    translate: none;
     margin: 0;
   }
 

@@ -1,7 +1,17 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { CHARTER_FIELD_NAMES, validateCharter, type CharterFields, type CharterRequestState } from "@/lib/charter";
+import {
+  BOOKING_WINDOW_DAYS,
+  CHARTER_FIELD_NAMES,
+  addDays,
+  charterForStorage,
+  isoDate,
+  tidyCharter,
+  validateCharter,
+  type CharterFields,
+  type CharterRequestState,
+} from "@/lib/charter";
 import { CAPTCHA_ANSWER_FIELD, captchaAnswerError, firstNameOf } from "@/lib/forms";
 import { storeSubmission, submittedFrom } from "@/lib/server/inquiries";
 
@@ -10,34 +20,35 @@ export async function submitCharterRequest(
   _previous: CharterRequestState,
   formData: FormData,
 ): Promise<CharterRequestState> {
-  const fields = Object.fromEntries(
-    CHARTER_FIELD_NAMES.map((name) => [name, String(formData.get(name) ?? "").trim()]),
-  ) as CharterFields;
+  const fields = tidyCharter(
+    Object.fromEntries(CHARTER_FIELD_NAMES.map((name) => [name, String(formData.get(name) ?? "")])) as CharterFields,
+  );
 
-  // A day of slack so visitors ahead of or behind UTC can still pick their local "today".
-  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-  const errors = validateCharter(fields, yesterday);
+  // A day of slack either side so visitors ahead of or behind UTC can pick their local dates.
+  const today = isoDate(new Date());
+  const errors = validateCharter(fields, { earliest: addDays(today, -1), latest: addDays(today, BOOKING_WINDOW_DAYS + 1) });
   const captcha = captchaAnswerError(String(formData.get(CAPTCHA_ANSWER_FIELD) ?? ""));
   if (Object.keys(errors).length > 0 || captcha) {
     return { status: "error", message: "Please check the highlighted fields.", errors: { ...errors, ...(captcha && { captcha }) } };
   }
 
-  const roundTrip = fields.tripType === "Round Trip";
+  const request = charterForStorage(fields);
+  const roundTrip = request.tripType === "Round Trip";
   const failure = await storeSubmission(formData, {
     kind: "charter",
-    topic: `Charter request · ${fields.aircraftType}`,
-    name: fields.name,
-    email: fields.email,
-    phone: `${fields.countryCode} ${fields.phone}`,
-    message: fields.requirements,
+    topic: `Charter request · ${request.aircraftType}`,
+    name: request.name,
+    email: request.email,
+    phone: request.phone,
+    message: request.requirements,
     details: {
-      aircraftType: fields.aircraftType,
-      tripType: fields.tripType,
-      from: fields.from,
-      to: fields.to,
-      departureDate: fields.departureDate,
-      ...(roundTrip && { returnDate: fields.returnDate }),
-      passengers: fields.passengers,
+      aircraftType: request.aircraftType,
+      tripType: request.tripType,
+      from: request.from,
+      to: request.to,
+      departureDate: request.departureDate,
+      ...(roundTrip && { returnDate: request.returnDate }),
+      passengers: String(Number(request.passengers)),
     },
     page: submittedFrom(formData),
   });
@@ -50,5 +61,5 @@ export async function submitCharterRequest(
       captchaReset: randomUUID(),
     };
   }
-  return { status: "success", firstName: firstNameOf(fields.name) };
+  return { status: "success", firstName: firstNameOf(request.name) };
 }

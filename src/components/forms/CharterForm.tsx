@@ -7,6 +7,7 @@ import {
   useState,
   useSyncExternalStore,
   type ChangeEvent,
+  type FocusEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
@@ -15,25 +16,36 @@ import { AnimatePresence, motion } from "motion/react";
 import { submitCharterRequest } from "@/app/actions/charter-request";
 import {
   AIRCRAFT_TYPES,
+  BOOKING_WINDOW_DAYS,
   COUNTRY_CODES,
+  MAX_PASSENGERS,
   PREFILL_EVENT,
   TRIP_TYPES,
+  addDays,
+  tidyCharter,
   validateCharter,
   type AircraftType,
   type CharterFields,
   type CharterPrefill,
   type CharterRequestState,
 } from "@/lib/charter";
-import { CAPTCHA_ANSWER_FIELD, PAGE_FIELD, captchaAnswerError, type FormErrors } from "@/lib/forms";
+import { LIMITS, PAGE_FIELD, captchaAnswerError, tidy, type FormErrors } from "@/lib/forms";
 import { Field } from "./Field";
 import { FormSuccess } from "./FormSuccess";
 import { MathCaptcha } from "./MathCaptcha";
+import { useFormErrors } from "./useFormErrors";
 import styles from "./Form.module.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
 
 type FieldName = keyof CharterFields | "captcha";
+
+/** On-screen order, so a failed submit lands on the first problem. */
+const ORDER: readonly FieldName[] = ["passengers", "from", "to", "departureDate", "returnDate", "name", "email", "phone", "requirements", "captcha"];
+
+/** Single-line fields tidied (trimmed, single spaces) when the visitor leaves them. */
+const SINGLE_LINE = new Set<keyof CharterFields>(["from", "to", "name", "email", "phone"]);
 
 const initialState: CharterRequestState = { status: "idle" };
 
@@ -55,6 +67,9 @@ const emptyFields: CharterFields = {
 // The visitor's local date; empty during the server render so hydration always matches.
 const noopSubscribe = () => () => {};
 const useToday = () => useSyncExternalStore(noopSubscribe, () => new Date().toLocaleDateString("en-CA"), () => "");
+
+/** Keeps only what can appear in a phone number. */
+const phoneCharacters = (value: string) => value.replace(/[^\d\s()+.-]/g, "");
 
 const iconProps = {
   viewBox: "0 0 32 32",
@@ -95,14 +110,30 @@ export function CharterForm() {
 function CharterFormInner({ onReset }: { onReset: () => void }) {
   const [state, formAction, pending] = useActionState(submitCharterRequest, initialState);
   const [values, setValues] = useState<CharterFields>(emptyFields);
-  const [clientErrors, setClientErrors] = useState<FormErrors<keyof CharterFields>>({});
-  const [edited, setEdited] = useState<ReadonlySet<FieldName>>(new Set());
   const [swapTurns, setSwapTurns] = useState(0);
   const [highlight, setHighlight] = useState(0);
   const pathname = usePathname();
   const today = useToday();
+  const latest = today ? addDays(today, BOOKING_WINDOW_DAYS) : undefined;
   const uid = useId();
   const fieldId = (name: FieldName) => `${uid}-${name}`;
+
+  // A used-up security question is replaced by a fresh one (new key → remount), which clears its answer.
+  const captchaKey = state.status === "error" && state.captchaReset ? state.captchaReset : "initial";
+  const [captcha, setCaptcha] = useState({ key: captchaKey, answer: "" });
+  const captchaAnswer = captcha.key === captchaKey ? captcha.answer : "";
+
+  const errors: FormErrors<keyof CharterFields> = validateCharter(tidyCharter(values), { earliest: today || undefined, latest });
+  const captchaProblem = captchaAnswerError(captchaAnswer);
+  if (captchaProblem) errors.captcha = captchaProblem;
+
+  const form = useFormErrors({
+    errors,
+    response: state,
+    serverErrors: state.status === "error" ? (state.errors ?? {}) : {},
+    order: ORDER,
+    fieldId,
+  });
 
   // Pre-fill from fleet cards and "Book this deal"
   useEffect(() => {
@@ -123,54 +154,49 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
     return () => window.removeEventListener(PREFILL_EVENT, onPrefill);
   }, []);
 
-  const clearError = (name: FieldName) => {
-    setEdited((s) => new Set(s).add(name));
-    setClientErrors((errors) => {
-      if (!(name in errors)) return errors;
-      const next = { ...errors };
-      delete next[name];
-      return next;
-    });
-  };
   const update = (name: keyof CharterFields, value: string) => {
     setValues((v) => ({ ...v, [name]: value }));
-    clearError(name);
+    form.changed(name);
   };
-  const bind = (name: keyof CharterFields) => ({
+
+  const bind = (name: keyof CharterFields, clean: (value: string) => string = (value) => value) => ({
     id: fieldId(name),
     name,
     value: values[name],
-    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => update(name, e.target.value),
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => update(name, clean(e.target.value)),
+    onBlur: (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      form.left(name, e.target.value);
+      if (SINGLE_LINE.has(name)) setValues((v) => (v[name] === tidy(v[name]) ? v : { ...v, [name]: tidy(v[name]) }));
+    },
+    ...form.describe(name),
   });
 
-  const serverErrors: FormErrors<keyof CharterFields> = state.status === "error" ? (state.errors ?? {}) : {};
-  const errorFor = (name: FieldName) => clientErrors[name] ?? (edited.has(name) ? undefined : serverErrors[name]);
-  const describe = (name: FieldName) =>
-    errorFor(name) ? { "aria-invalid": true, "aria-describedby": `${fieldId(name)}-error` } : {};
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    const errors: FormErrors<keyof CharterFields> = validateCharter(values, today || undefined);
-    const captcha = captchaAnswerError(String(new FormData(e.currentTarget).get(CAPTCHA_ANSWER_FIELD) ?? ""));
-    if (captcha) errors.captcha = captcha;
-    const invalid = Object.keys(errors) as FieldName[];
-    if (invalid.length > 0) {
-      e.preventDefault();
-      setClientErrors(errors);
-      document.getElementById(fieldId(invalid[0]))?.focus();
-      return;
-    }
-    setClientErrors({});
-    setEdited(new Set());
+    if (!form.check()) e.preventDefault();
+  };
+
+  const aircraft = values.aircraftType as AircraftType;
+  const maxPassengers = MAX_PASSENGERS[aircraft];
+  const passengers = Number.parseInt(values.passengers, 10) || 0;
+
+  const chooseAircraft = (type: AircraftType) => {
+    // Bring the passenger count within what the new aircraft type can take
+    setValues((v) => {
+      const count = Number.parseInt(v.passengers, 10);
+      return { ...v, aircraftType: type, passengers: count > MAX_PASSENGERS[type] ? String(MAX_PASSENGERS[type]) : v.passengers };
+    });
+    form.changed("aircraftType");
   };
 
   const swapRoute = () => {
     setValues((v) => ({ ...v, from: v.to, to: v.from }));
+    form.changed("from");
+    form.changed("to");
     setSwapTurns((t) => t + 1);
   };
 
   const stepPassengers = (delta: number) => {
-    const current = Number.parseInt(values.passengers, 10) || 0;
-    update("passengers", String(Math.min(99, Math.max(1, current + delta))));
+    update("passengers", String(Math.min(maxPassengers, Math.max(1, passengers + delta))));
   };
 
   if (state.status === "success") {
@@ -184,10 +210,8 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
     );
   }
 
-  const hasClientErrors = Object.keys(clientErrors).length > 0;
-  const banner = hasClientErrors ? "Please check the highlighted fields." : state.status === "error" ? state.message : null;
-  // A used-up security question is replaced by a fresh one (new key → remount).
-  const captchaKey = state.status === "error" && state.captchaReset ? state.captchaReset : "initial";
+  const banner = form.blocked ? "Please check the highlighted fields." : state.status === "error" ? state.message : null;
+  const country = COUNTRY_CODES.find((c) => c.code === values.countryCode);
 
   return (
     <form className={styles.form} action={formAction} onSubmit={handleSubmit} noValidate>
@@ -216,7 +240,7 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
                   name="aircraftType"
                   value={type}
                   checked={checked}
-                  onChange={() => update("aircraftType", type)}
+                  onChange={() => chooseAircraft(type)}
                   className="sr-only"
                 />
                 {checked && <motion.span layoutId={`${uid}-type`} className={styles.typeHighlight} transition={SPRING} />}
@@ -250,13 +274,19 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
             })}
           </div>
 
-          <Field id={fieldId("passengers")} label="Passengers" error={errorFor("passengers")}>
+          <Field id={fieldId("passengers")} label="Passengers" error={form.errorFor("passengers")}>
             <div className={styles.stepper}>
-              <button type="button" aria-label="Fewer passengers" onClick={() => stepPassengers(-1)} disabled={Number(values.passengers) <= 1}>
+              <button type="button" aria-label="Fewer passengers" onClick={() => stepPassengers(-1)} disabled={passengers <= 1}>
                 −
               </button>
-              <input {...bind("passengers")} {...describe("passengers")} inputMode="numeric" className={styles.stepperInput} />
-              <button type="button" aria-label="More passengers" onClick={() => stepPassengers(1)}>
+              <input
+                {...bind("passengers", (value) => value.replace(/\D/g, "").slice(0, 2))}
+                inputMode="numeric"
+                maxLength={2}
+                required
+                className={styles.stepperInput}
+              />
+              <button type="button" aria-label="More passengers" onClick={() => stepPassengers(1)} disabled={passengers >= maxPassengers}>
                 +
               </button>
             </div>
@@ -264,8 +294,16 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
         </div>
 
         <div className={styles.route}>
-          <Field id={fieldId("from")} label="From" error={errorFor("from")}>
-            <input {...bind("from")} {...describe("from")} placeholder="Departure city" maxLength={80} className={styles.input} />
+          <Field id={fieldId("from")} label="From" error={form.errorFor("from")}>
+            <input
+              {...bind("from")}
+              placeholder="Departure city"
+              maxLength={LIMITS.place}
+              autoComplete="off"
+              autoCapitalize="words"
+              required
+              className={styles.input}
+            />
           </Field>
           <motion.button
             type="button"
@@ -279,14 +317,22 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
               <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />
             </svg>
           </motion.button>
-          <Field id={fieldId("to")} label="To" error={errorFor("to")}>
-            <input {...bind("to")} {...describe("to")} placeholder="Arrival city" maxLength={80} className={styles.input} />
+          <Field id={fieldId("to")} label="To" error={form.errorFor("to")}>
+            <input
+              {...bind("to")}
+              placeholder="Arrival city"
+              maxLength={LIMITS.place}
+              autoComplete="off"
+              autoCapitalize="words"
+              required
+              className={styles.input}
+            />
           </Field>
         </div>
 
         <div className={styles.split}>
-          <Field id={fieldId("departureDate")} label="Departure date" error={errorFor("departureDate")}>
-            <input {...bind("departureDate")} {...describe("departureDate")} type="date" min={today || undefined} className={styles.input} />
+          <Field id={fieldId("departureDate")} label="Departure date" error={form.errorFor("departureDate")}>
+            <input {...bind("departureDate")} type="date" min={today || undefined} max={latest} required className={styles.input} />
           </Field>
           <AnimatePresence initial={false}>
             {values.tripType === "Round Trip" && (
@@ -297,12 +343,13 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.45, ease: EASE }}
               >
-                <Field id={fieldId("returnDate")} label="Return date" error={errorFor("returnDate")}>
+                <Field id={fieldId("returnDate")} label="Return date" error={form.errorFor("returnDate")}>
                   <input
                     {...bind("returnDate")}
-                    {...describe("returnDate")}
                     type="date"
                     min={values.departureDate || today || undefined}
+                    max={latest}
+                    required
                     className={styles.input}
                   />
                 </Field>
@@ -318,39 +365,80 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
         </legend>
 
         <div className={styles.split}>
-          <Field id={fieldId("name")} label="Full name" error={errorFor("name")}>
-            <input {...bind("name")} {...describe("name")} autoComplete="name" maxLength={120} className={styles.input} />
+          <Field id={fieldId("name")} label="Full name" error={form.errorFor("name")}>
+            <input {...bind("name")} autoComplete="name" autoCapitalize="words" maxLength={LIMITS.name} required className={styles.input} />
           </Field>
-          <Field id={fieldId("email")} label="Email" error={errorFor("email")}>
-            <input {...bind("email")} {...describe("email")} type="email" autoComplete="email" maxLength={160} className={styles.input} />
+          <Field id={fieldId("email")} label="Email" error={form.errorFor("email")}>
+            <input
+              {...bind("email")}
+              type="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={LIMITS.email}
+              required
+              className={styles.input}
+            />
           </Field>
         </div>
 
-        <Field id={fieldId("phone")} label="Phone" error={errorFor("phone")}>
+        <Field id={fieldId("phone")} label="Phone" error={form.errorFor("phone")}>
           <div className={styles.phone}>
-            <select {...bind("countryCode")} aria-label="Country code" className={`${styles.input} ${styles.select}`}>
+            <select
+              id={fieldId("countryCode")}
+              name="countryCode"
+              value={values.countryCode}
+              onChange={(e) => {
+                update("countryCode", e.target.value);
+                form.changed("phone");
+              }}
+              aria-label="Country code"
+              className={`${styles.input} ${styles.select}`}
+            >
               {COUNTRY_CODES.map((c) => (
                 <option key={c.code + c.label} value={c.code}>
                   {c.label}
                 </option>
               ))}
             </select>
-            <input {...bind("phone")} {...describe("phone")} type="tel" autoComplete="tel-national" maxLength={24} className={styles.input} />
+            <input
+              {...bind("phone", phoneCharacters)}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              maxLength={LIMITS.phone}
+              placeholder={country?.code === "+91" ? "10-digit mobile number" : "Phone number"}
+              required
+              className={styles.input}
+            />
           </div>
         </Field>
 
-        <Field id={fieldId("requirements")} label="Requirements (optional)" error={errorFor("requirements")}>
+        <Field
+          id={fieldId("requirements")}
+          label="Requirements (optional)"
+          error={form.errorFor("requirements")}
+          counter={`${values.requirements.length.toLocaleString("en-IN")} / ${LIMITS.requirements.toLocaleString("en-IN")}`}
+        >
           <textarea
             {...bind("requirements")}
-            {...describe("requirements")}
             rows={3}
-            maxLength={4000}
+            maxLength={LIMITS.requirements}
             placeholder="Luggage, special requests, flexible dates…"
             className={`${styles.input} ${styles.textarea}`}
           />
         </Field>
 
-        <MathCaptcha key={captchaKey} inputId={fieldId("captcha")} error={errorFor("captcha")} onAnswer={() => clearError("captcha")} />
+        <MathCaptcha
+          key={captchaKey}
+          inputId={fieldId("captcha")}
+          error={form.errorFor("captcha")}
+          onAnswer={(answer) => {
+            setCaptcha({ key: captchaKey, answer });
+            form.changed("captcha");
+          }}
+          onBlur={() => form.left("captcha", captchaAnswer)}
+        />
       </fieldset>
 
       <div className={styles.footer}>

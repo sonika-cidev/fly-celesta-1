@@ -5,12 +5,13 @@ import { hasSession } from "@/lib/server/admin-session";
 import { listInquiries } from "@/lib/server/inquiries";
 import { StoreUnavailableError, type Inquiry, type InquiryKind, type InquiryPage } from "@/lib/server/store";
 import { logout } from "./actions";
+import { Pagination } from "./Pagination";
 import styles from "./admin.module.css";
 
 // Always rendered per request: it depends on the sign-in cookie and live data.
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 const TABS: { kind?: InquiryKind; label: string }[] = [
   { label: "All" },
@@ -65,6 +66,10 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   };
 
   const pages = result ? Math.max(1, Math.ceil(result.total / PAGE_SIZE)) : 1;
+  // Past the end (e.g. after inquiries were removed): show the last page instead of an empty one
+  if (result && result.total > 0 && page > pages) redirect(href({ kind, page: pages }));
+  const firstShown = (page - 1) * PAGE_SIZE + 1;
+  const lastShown = result ? firstShown + result.items.length - 1 : 0;
 
   return (
     <main className={styles.page}>
@@ -102,30 +107,15 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         result && (
           <>
             <p className={styles.summary}>
-              {result.total} {result.total === 1 ? "inquiry" : "inquiries"} · newest first
-              {pages > 1 && ` · page ${page} of ${pages}`}
+              {pages > 1 ? `Showing ${firstShown}–${lastShown} of ${result.total}` : result.total}{" "}
+              {result.total === 1 ? "inquiry" : "inquiries"} · newest first
             </p>
             <ol className={styles.list}>
               {result.items.map((inquiry) => (
                 <InquiryCard key={inquiry.id} inquiry={inquiry} />
               ))}
             </ol>
-            {pages > 1 && (
-              <nav className={styles.pager} aria-label="Pages">
-                {page > 1 ? (
-                  <Link href={href({ kind, page: page - 1 })} className={styles.ghost}>
-                    ← Newer
-                  </Link>
-                ) : (
-                  <span />
-                )}
-                {page < pages && (
-                  <Link href={href({ kind, page: page + 1 })} className={styles.ghost}>
-                    Older →
-                  </Link>
-                )}
-              </nav>
-            )}
+            <Pagination page={page} pages={pages} href={(n) => href({ kind, page: n })} />
           </>
         )
       )}
