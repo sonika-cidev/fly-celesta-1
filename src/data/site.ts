@@ -1,4 +1,5 @@
-// Company details and copy come from the current flycelesta.in site.
+// Company details and copy. Facts come from the current flycelesta.in site; copy for the new
+// pages (company, career) is drafted from them — confirm final wording with the client.
 export const site = {
   name: "Fly Celesta",
   legalName: "Fly Celesta Private Limited",
@@ -8,13 +9,6 @@ export const site = {
   phoneHref: "tel:+919188037000",
   address: ["Prestige Shantiniketan, 10th Floor, Tower B", "ITPL Main Rd, Whitefield", "Bengaluru 560048, Karnataka, India"],
 };
-
-export const navLinks = [
-  { label: "Services", href: "#services" },
-  { label: "About", href: "#about" },
-  { label: "Fleet", href: "#fleet" },
-  { label: "Charter Deals", href: "#deals" },
-];
 
 export const about = {
   statement:
@@ -44,29 +38,16 @@ export const about = {
   ],
 };
 
-export const photoCredits = [
-  { subject: "Helicopter near Nilgiri", author: "Roman Raghu Shrestha", license: "CC BY-SA 4.0" },
-  { subject: "Business jet cabin", author: "JetRequest.com", license: "CC BY-SA 3.0" },
-  { subject: "Helicopter over Manhattan", author: "Joe Mabel", license: "CC BY-SA 3.0" },
-  { subject: "AW109SP GrandNew", author: "Md Shaifuzzaman Ayon", license: "CC BY-SA 4.0" },
-  { subject: "Gulfstream G200 at the hangar", author: "The.rud", license: "CC BY-SA 4.0" },
-  { subject: "Bell 505 Jet Ranger X", author: "Mpcaissy", license: "CC BY-SA 4.0" },
-  { subject: "Agusta A109, Swiss Alps", author: "Ikiwaner", license: "CC BY-SA 3.0" },
-  { subject: "Helicopter at the Eiger", author: "Mario Lang", license: "CC BY 4.0" },
-  { subject: "Airbus H130 in flight", author: "kitmasterbloke", license: "CC BY 2.0" },
-  { subject: "Airbus H125", author: "Julian Povey", license: "CC BY 2.0" },
-  { subject: "Airbus H130, Heli Air Monaco", author: "Hugo LUC", license: "CC BY-SA 4.0" },
-  { subject: "Bell 206L LongRanger", author: "Bernard Gagnon", license: "CC BY-SA 4.0" },
-  { subject: "Bell 407", author: "Acroterion", license: "CC BY-SA 4.0" },
-  { subject: "AW119 Koala", author: "Md Shaifuzzaman Ayon", license: "CC BY-SA 4.0" },
-  { subject: "Robinson R66", author: "Jubair1985", license: "CC BY-SA 4.0" },
-  { subject: "Airbus H135", author: "Ccelio", license: "CC BY-SA 3.0" },
-  { subject: "Agusta A109E Power", author: "Bidgee", license: "CC BY-SA 3.0" },
-  { subject: "Bell 429", author: "Md Shaifuzzaman Ayon", license: "CC BY-SA 4.0" },
-  { subject: "King Air 200", author: "ZLEA", license: "CC BY-SA 4.0" },
-  { subject: "Premier 1A", author: "flybyeigenheer", license: "CC BY-SA 2.0" },
-  { subject: "Citation CJ2+", author: "Raimond Spekking", license: "CC BY-SA 4.0" },
-  { subject: "Citation XLS", author: "Julian Herzog", license: "CC BY 4.0" },
-  { subject: "Hawker 900XP", author: "Tomás Del Coro", license: "CC BY-SA 2.0" },
-  { subject: "Gulfstream G200", author: "byeangel", license: "CC BY-SA 2.0" },
-];
+export const company = {
+  lede: "Fly Celesta Private Limited is a Bengaluru-based aviation company — charters, aircraft sales, consultancy and unmanned systems, delivered with a culture of excellence, integrity and innovation.",
+};
+
+export const career = {
+  lede: "We're a growing aviation company bringing together ex-military aviators, civil aviation veterans and dedicated client-service professionals. If you share our commitment to safety and service, we'd like to hear from you.",
+  reasons: [
+    { title: "Learn from the best", body: "Work alongside ex-military aviators and civil aviation veterans who share their experience every day." },
+    { title: "Safety first", body: "Every flight is held to the highest standards of safety and reliability — and so is every role." },
+    { title: "Room to grow", body: "A growing company expanding helicopter and fixed-wing operations across India, Nepal and beyond." },
+    { title: "Client-centric", body: "Help deliver tailored, discreet service to clients who expect the exceptional." },
+  ],
+};

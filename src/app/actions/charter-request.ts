@@ -1,17 +1,11 @@
 "use server";
 
-import { site } from "@/data/site";
-import {
-  CHARTER_FIELD_NAMES,
-  validateCharter,
-  type CharterFields,
-  type CharterRequestState,
-} from "@/lib/charter";
+import { randomUUID } from "node:crypto";
+import { CHARTER_FIELD_NAMES, validateCharter, type CharterFields, type CharterRequestState } from "@/lib/charter";
+import { CAPTCHA_ANSWER_FIELD, captchaAnswerError, firstNameOf } from "@/lib/forms";
+import { storeSubmission, submittedFrom } from "@/lib/server/inquiries";
 
-/**
- * Validates a charter request and forwards it as JSON to CHARTER_REQUEST_WEBHOOK_URL
- * (an email/CRM automation such as Zapier, Make or a custom endpoint).
- */
+/** Validates a charter request, checks the security question and stores it for the admin panel. */
 export async function submitCharterRequest(
   _previous: CharterRequestState,
   formData: FormData,
@@ -23,32 +17,38 @@ export async function submitCharterRequest(
   // A day of slack so visitors ahead of or behind UTC can still pick their local "today".
   const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   const errors = validateCharter(fields, yesterday);
-  if (Object.keys(errors).length > 0) {
-    return { status: "error", message: "Please check the highlighted fields.", errors };
+  const captcha = captchaAnswerError(String(formData.get(CAPTCHA_ANSWER_FIELD) ?? ""));
+  if (Object.keys(errors).length > 0 || captcha) {
+    return { status: "error", message: "Please check the highlighted fields.", errors: { ...errors, ...(captcha && { captcha }) } };
   }
 
-  const webhook = process.env.CHARTER_REQUEST_WEBHOOK_URL;
-  const fallback = `Please call ${site.phone} or email ${site.email}.`;
+  const roundTrip = fields.tripType === "Round Trip";
+  const failure = await storeSubmission(formData, {
+    kind: "charter",
+    topic: `Charter request · ${fields.aircraftType}`,
+    name: fields.name,
+    email: fields.email,
+    phone: `${fields.countryCode} ${fields.phone}`,
+    message: fields.requirements,
+    details: {
+      aircraftType: fields.aircraftType,
+      tripType: fields.tripType,
+      from: fields.from,
+      to: fields.to,
+      departureDate: fields.departureDate,
+      ...(roundTrip && { returnDate: fields.returnDate }),
+      passengers: fields.passengers,
+    },
+    page: submittedFrom(formData),
+  });
 
-  if (webhook) {
-    try {
-      const response = await fetch(webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...fields, submittedAt: new Date().toISOString(), source: "website: request a charter" }),
-      });
-      if (!response.ok) throw new Error(`Webhook responded with ${response.status}`);
-    } catch (error) {
-      console.error("[charter-request] delivery failed", error);
-      return { status: "error", message: `We couldn't send your request just now. ${fallback}` };
-    }
-  } else if (process.env.NODE_ENV === "production") {
-    // Never confirm a request that isn't going anywhere.
-    console.error("[charter-request] CHARTER_REQUEST_WEBHOOK_URL is not set — request not delivered");
-    return { status: "error", message: `Online requests aren't connected yet. ${fallback}` };
-  } else {
-    console.info("[charter-request] dev mode, not forwarded:", fields);
+  if (failure) {
+    return {
+      status: "error",
+      message: failure.message,
+      ...(failure.captcha && { errors: { captcha: failure.captcha } }),
+      captchaReset: randomUUID(),
+    };
   }
-
-  return { status: "success", firstName: fields.name.split(/\s+/)[0] };
+  return { status: "success", firstName: firstNameOf(fields.name) };
 }

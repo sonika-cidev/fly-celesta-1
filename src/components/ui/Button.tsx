@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
+import { RouteLink } from "./RouteLink";
 import styles from "./Button.module.css";
+
+type Variant = "solid" | "ghost" | "light" | "text";
 
 type ButtonProps = {
   href: string;
   children: ReactNode;
   /** solid: midnight pill · ghost: outlined pill · light: porcelain pill for dark sections · text: underlined link */
-  variant?: "solid" | "ghost" | "light" | "text";
+  variant?: Variant;
   className?: string;
-  onClick?: () => void;
 };
 
 const Arrow = () => (
@@ -16,14 +18,34 @@ const Arrow = () => (
   </svg>
 );
 
-/** Pill button with a circular arrow badge that slides on hover. In-page and mailto links stay plain anchors so Lenis can animate them. */
-export function Button({ href, children, variant = "solid", className, onClick }: ButtonProps) {
+export const buttonClass = (variant: Variant = "solid", className?: string) =>
+  [styles.button, styles[variant], className].filter(Boolean).join(" ");
+
+/** Label plus the circular arrow badge — for custom link elements styled with buttonClass(). */
+export function ButtonInner({ children }: { children: ReactNode }) {
   return (
-    <a href={href} onClick={onClick} className={[styles.button, styles[variant], className].filter(Boolean).join(" ")}>
+    <>
       <span className={styles.label}>{children}</span>
       <span className={styles.badge}>
         <Arrow />
       </span>
+    </>
+  );
+}
+
+/**
+ * Pill button with a circular arrow badge that slides on hover. Other pages use RouteLink;
+ * in-page anchors and mailto/tel links stay plain anchors so Lenis can animate them.
+ */
+export function Button({ href, children, variant = "solid", className }: ButtonProps) {
+  const isRoute = href.startsWith("/") && !href.startsWith("/#");
+  return isRoute ? (
+    <RouteLink href={href} className={buttonClass(variant, className)}>
+      <ButtonInner>{children}</ButtonInner>
+    </RouteLink>
+  ) : (
+    <a href={href} className={buttonClass(variant, className)}>
+      <ButtonInner>{children}</ButtonInner>
     </a>
   );
 }

@@ -3,27 +3,35 @@ import { services } from "@/data/services";
 import { ServiceCard } from "./ServiceCard";
 import styles from "./Services.module.css";
 
-export function Services() {
+/** The five services as editorial cards. The services page supplies its own heading. */
+export function Services({ withHeading = true }: { withHeading?: boolean }) {
   return (
-    <section id="services" className={styles.services} aria-labelledby="services-title">
+    <section
+      id="services"
+      className={`${styles.services} ${withHeading ? "" : styles.flush}`}
+      aria-labelledby={withHeading ? "services-title" : undefined}
+      aria-label={withHeading ? undefined : "Our services"}
+    >
       <div className="container">
-        <SectionHeading
-          id="services-title"
-          label="Our services"
-          title={
-            <>
-              Every journey,
-              <br />
-              <em>handled.</em>
-            </>
-          }
-          intro={
-            <p>
-              Charters, aircraft sales, dry leasing, financing, consultancy, acquisitions and appraisal — premium aviation
-              services, tailored to your needs.
-            </p>
-          }
-        />
+        {withHeading && (
+          <SectionHeading
+            id="services-title"
+            label="Our services"
+            title={
+              <>
+                Every journey,
+                <br />
+                <em>handled.</em>
+              </>
+            }
+            intro={
+              <p>
+                Charters, aircraft sales and acquisitions, aviation consultancy and unmanned aviation systems — premium
+                aviation services, tailored to your needs.
+              </p>
+            }
+          />
+        )}
 
         <ol className={styles.grid}>
           {services.map((service, i) => (

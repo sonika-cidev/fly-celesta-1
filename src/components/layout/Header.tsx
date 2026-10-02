@@ -2,17 +2,30 @@
 
 import { useLenis } from "lenis/react";
 import { AnimatePresence, motion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 import { Logo } from "@/components/brand/Logo";
-import { navLinks, site } from "@/data/site";
+import { RequestCharterLink } from "@/components/ui/RequestCharterLink";
+import { SmartLink } from "@/components/ui/SmartLink";
+import { navigation, type NavItem } from "@/data/navigation";
+import { site } from "@/data/site";
 import { glideTo } from "@/lib/scroll";
 import styles from "./Header.module.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+const Chevron = () => (
+  <svg className={styles.chevron} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 3.8 5 6.6l3-2.8" />
+  </svg>
+);
+
 export function Header() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // The menu belongs to the page it was opened on, so it closes itself on navigation
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const open = menuPath === pathname;
   const lenis = useLenis();
 
   useEffect(() => {
@@ -27,7 +40,7 @@ export function Header() {
     if (!open) return;
     lenis?.stop();
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuPath(null);
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
@@ -36,28 +49,52 @@ export function Header() {
     };
   }, [open, lenis]);
 
-  const goTo = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    setOpen(false);
-    if (!lenis) return;
-    e.preventDefault();
-    lenis.start();
-    glideTo(lenis, href);
+  const isActive = (item: NavItem) => (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href));
+
+  // Menu-sheet links: close the sheet; a section on this page needs the scroller restarted first
+  const onSheetLink = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    setMenuPath(null);
+    const [path, hash] = href.split("#");
+    if (path === "" || path === pathname) {
+      e.preventDefault();
+      lenis?.start();
+      glideTo(lenis, hash ? `#${hash}` : "#top");
+    }
   };
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ""} ${open ? styles.menuOpen : ""}`}>
       <div className={styles.bar}>
         <nav className={styles.nav} aria-label="Primary">
-          {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className={styles.link}>
-              {link.label}
-            </a>
-          ))}
+          <ul className={styles.menu}>
+            {navigation.map((item) => (
+              <li key={item.label} className={styles.item}>
+                <SmartLink href={item.href} className={styles.link} aria-current={isActive(item) ? "page" : undefined}>
+                  {item.label}
+                  {item.children && <Chevron />}
+                </SmartLink>
+                {item.children && (
+                  <div className={styles.dropdown}>
+                    <ul className={styles.dropdownList}>
+                      {item.children.map((child) => (
+                        <li key={child.href}>
+                          <SmartLink href={child.href} className={styles.dropdownLink}>
+                            <span className={`serif ${styles.dropdownLabel}`}>{child.label}</span>
+                            <span className={styles.dropdownNote}>{child.note}</span>
+                          </SmartLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        <a href="#top" className={styles.brand} aria-label="Fly Celesta — back to top">
+        <SmartLink href="/#top" className={styles.brand} aria-label="Fly Celesta — home">
           <Logo width={172} preload className={styles.logo} />
-        </a>
+        </SmartLink>
 
         <div className={styles.actions}>
           <a href={site.phoneHref} className={styles.phone}>
@@ -66,16 +103,14 @@ export function Header() {
             </svg>
             {site.phone}
           </a>
-          <a href="#request" className={styles.cta}>
-            Request a charter
-          </a>
+          <RequestCharterLink className={styles.cta}>Request a charter</RequestCharterLink>
           <button
             type="button"
             className={styles.menuButton}
             aria-expanded={open}
             aria-controls="menu-sheet"
             aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setMenuPath(open ? null : pathname)}
           >
             <span />
             <span />
@@ -94,28 +129,51 @@ export function Header() {
             transition={{ duration: 0.7, ease: [0.65, 0, 0.35, 1] }}
             data-lenis-prevent
           >
-            <nav className={styles.sheetNav} aria-label="Menu">
-              {[...navLinks, { label: "Request a charter", href: "#request" }].map((link, i) => (
-                <motion.a
-                  key={link.href}
-                  href={link.href}
-                  className={styles.sheetLink}
-                  onClick={(e) => goTo(e, link.href)}
+            <nav aria-label="Menu">
+              <ul className={styles.sheetNav}>
+                {navigation.map((item, i) => (
+                  <motion.li
+                    key={item.label}
+                    className={styles.sheetItem}
+                    initial={{ opacity: 0, y: 28 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: EASE, delay: 0.25 + i * 0.06 }}
+                  >
+                    <SmartLink
+                      href={item.href}
+                      className={styles.sheetLink}
+                      aria-current={isActive(item) ? "page" : undefined}
+                      onClick={(e) => onSheetLink(e, item.href)}
+                    >
+                      <span className={styles.sheetIndex}>0{i + 1}</span>
+                      {item.label}
+                    </SmartLink>
+                    {item.children && (
+                      <ul className={styles.sheetChildren}>
+                        {item.children.map((child) => (
+                          <li key={child.href}>
+                            <SmartLink href={child.href} onClick={(e) => onSheetLink(e, child.href)}>
+                              {child.label}
+                            </SmartLink>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </motion.li>
+                ))}
+                <motion.li
+                  className={styles.sheetItem}
                   initial={{ opacity: 0, y: 28 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.7, ease: EASE, delay: 0.25 + i * 0.06 }}
+                  transition={{ duration: 0.7, ease: EASE, delay: 0.25 + navigation.length * 0.06 }}
                 >
-                  <span className={styles.sheetIndex}>0{i + 1}</span>
-                  {link.label}
-                </motion.a>
-              ))}
+                  <RequestCharterLink className={`${styles.sheetLink} ${styles.sheetCta}`} onNavigate={() => setMenuPath(null)}>
+                    Request a charter
+                  </RequestCharterLink>
+                </motion.li>
+              </ul>
             </nav>
-            <motion.div
-              className={styles.sheetContact}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
+            <motion.div className={styles.sheetContact} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.6 }}>
               <a href={site.phoneHref}>{site.phone}</a>
               <a href={`mailto:${site.email}`}>{site.email}</a>
             </motion.div>

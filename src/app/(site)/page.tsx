@@ -1,5 +1,3 @@
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
 import { About } from "@/components/sections/About";
 import { Charter } from "@/components/sections/Charter";
 import { Deals } from "@/components/sections/Deals";
@@ -10,16 +8,12 @@ import { Services } from "@/components/sections/Services";
 export default function Home() {
   return (
     <>
-      <Header />
-      <main>
-        <Hero />
-        <Services />
-        <About />
-        <Fleet />
-        <Deals />
-        <Charter />
-      </main>
-      <Footer />
+      <Hero />
+      <Services />
+      <About link={{ label: "More about the company", href: "/about" }} />
+      <Fleet />
+      <Deals />
+      <Charter />
     </>
   );
 }

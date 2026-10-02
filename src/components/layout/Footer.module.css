@@ -1,13 +1,18 @@
 .footer {
   position: relative;
   z-index: 1;
-  margin-top: -56px;
-  padding-block: clamp(110px, 12vw, 168px) 36px;
+  margin-top: calc(-1 * var(--overlap));
+  padding-block: clamp(84px, 8.5vw, 124px) 36px;
   border-radius: 56px 56px 0 0;
   background:
     radial-gradient(50% 60% at 0% 0%, rgba(176, 141, 87, 0.14), transparent 60%),
     var(--night);
   color: var(--on-night);
+}
+
+/* The footer slides over the end of the page, so the last section keeps its full spacing in view */
+:global(main):has(+ .footer) > :last-child {
+  padding-bottom: calc(var(--section) + var(--overlap));
 }
 
 .signoff {
@@ -47,15 +52,15 @@
 .swoosh {
   display: block;
   width: 100%;
-  height: clamp(48px, 7vw, 96px);
-  margin-block: clamp(40px, 5vw, 64px);
+  height: clamp(40px, 5vw, 72px);
+  margin-block: clamp(24px, 3.5vw, 44px);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
-  gap: 48px;
-  padding-bottom: clamp(48px, 6vw, 72px);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.05fr) repeat(2, minmax(0, 0.9fr));
+  gap: 40px;
+  padding-bottom: clamp(36px, 4.5vw, 56px);
 }
 
 .brand {
@@ -109,43 +114,33 @@
 
 .bottom {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 32px;
   padding-top: 26px;
   border-top: 1px solid var(--line-night);
   font-size: 13px;
   color: var(--on-night-muted);
 }
 
-.credits {
-  font-size: 12px;
-  line-height: 1.8;
-}
-
-.credits summary {
-  display: inline-block;
-  cursor: pointer;
-  list-style: none;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.credit a {
   color: var(--gold-soft);
+  transition: color 0.3s;
 }
 
-.credits summary::-webkit-details-marker {
-  display: none;
+.credit a:hover {
+  color: var(--on-night);
 }
 
-.credits summary::after {
-  content: " +";
-}
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 
-.credits[open] summary::after {
-  content: " –";
-}
-
-.credits p {
-  margin-top: 10px;
-  opacity: 0.85;
+  .brand {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 900px) {
@@ -156,19 +151,20 @@
   .signoffAside {
     justify-self: start;
   }
+}
 
+@media (max-width: 700px) {
   .grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .brand {
+  .column:last-child {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 760px) {
   .footer {
-    margin-top: -36px;
     border-radius: 36px 36px 0 0;
   }
 }

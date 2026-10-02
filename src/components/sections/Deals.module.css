@@ -1,9 +1,14 @@
+/* The section the panel rises over keeps its full spacing in view */
+:global(main) > :has(+ .deals) {
+  padding-bottom: calc(var(--section) + var(--overlap));
+}
+
 /* Porcelain panel rising over the midnight fleet section */
 .deals {
   position: relative;
   z-index: 2;
-  margin-top: -56px;
-  padding-block: clamp(110px, 12vw, 176px) var(--section);
+  margin-top: calc(-1 * var(--overlap));
+  padding-block: clamp(84px, 8.5vw, 124px) var(--section);
   border-radius: 56px 56px 0 0;
   background: var(--paper);
 }
@@ -231,7 +236,6 @@
 /* Phones and small tablets: a vertical pass, torn horizontally */
 @media (max-width: 860px) {
   .deals {
-    margin-top: -36px;
     border-radius: 36px 36px 0 0;
   }
 

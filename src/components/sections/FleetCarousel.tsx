@@ -1,27 +1,21 @@
 "use client";
 
-import Image from "next/image";
 import { useLenis } from "lenis/react";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import type { FleetAircraft, FleetCategory } from "@/data/fleet";
 import { prefillCharter, type AircraftType } from "@/lib/charter";
 import { glideTo } from "@/lib/scroll";
+import { AircraftCard, ArrowIcon as Arrow } from "./AircraftCard";
 import styles from "./Fleet.module.css";
 
-const TYPE_OF: Record<FleetCategory["id"], AircraftType> = {
+export const TYPE_OF: Record<FleetCategory["id"], AircraftType> = {
   helicopters: "Helicopter",
   jets: "Private Jet",
   turboprops: "Turboprop",
 };
 
 type Item = FleetAircraft & { categoryId: FleetCategory["id"] };
-
-const Arrow = ({ flip = false }: { flip?: boolean }) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={flip ? { transform: "scaleX(-1)" } : undefined}>
-    <path d="M3 8h10M9 4l4 4-4 4" />
-  </svg>
-);
 
 export function FleetCarousel({ categories }: { categories: FleetCategory[] }) {
   const lenis = useLenis();
@@ -151,47 +145,7 @@ export function FleetCarousel({ categories }: { categories: FleetCategory[] }) {
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 6) * 0.04 }}
             >
-              <article className={styles.card}>
-                <div className={styles.media}>
-                  <Image
-                    src={a.image}
-                    alt={a.imageAlt}
-                    fill
-                    sizes="(max-width: 640px) 80vw, 380px"
-                    placeholder="blur"
-                    className={styles.image}
-                    draggable={false}
-                  />
-                  <span className={styles.badge}>{a.category}</span>
-                </div>
-                <div className={styles.body}>
-                  <h3 className={`serif ${styles.name}`}>{a.name}</h3>
-                  <dl className={styles.specs}>
-                    <div>
-                      <dt>Passengers</dt>
-                      <dd>Up to {a.passengers}</dd>
-                    </div>
-                    <div>
-                      <dt>Cruise</dt>
-                      <dd>{a.cruise} km/h</dd>
-                    </div>
-                    <div>
-                      <dt>Range</dt>
-                      <dd>{a.range.toLocaleString("en-IN")} km</dd>
-                    </div>
-                    <div>
-                      <dt>Configuration</dt>
-                      <dd>
-                        {a.engines === 1 ? "Single" : "Twin"} · {a.crew} crew
-                      </dd>
-                    </div>
-                  </dl>
-                  <button type="button" className={styles.request} onClick={() => request(a)}>
-                    Request this aircraft
-                    <Arrow />
-                  </button>
-                </div>
-              </article>
+              <AircraftCard aircraft={a} onRequest={() => request(a)} />
             </motion.li>
           ))}
         </AnimatePresence>

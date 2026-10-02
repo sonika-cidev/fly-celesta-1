@@ -1,9 +1,14 @@
+/* The section the panel slides over keeps its full spacing in view */
+:global(main) > :has(+ .fleet) {
+  padding-bottom: calc(var(--section) + var(--overlap));
+}
+
 /* Midnight "hangar" panel that slides over the section above it */
 .fleet {
   position: relative;
   z-index: 1;
-  margin-top: -56px;
-  padding-block: clamp(110px, 12vw, 176px) var(--section);
+  margin-top: calc(-1 * var(--overlap));
+  padding-block: clamp(84px, 8.5vw, 124px) var(--section);
   border-radius: 56px 56px 0 0;
   background:
     radial-gradient(60% 50% at 100% 0%, rgba(176, 141, 87, 0.14), transparent 60%),
@@ -295,13 +300,20 @@
   color: var(--on-night-muted);
 }
 
+.footnoteActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+}
+
 .footnote {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 20px 32px;
-  margin-top: clamp(48px, 6vw, 80px);
+  margin-top: clamp(36px, 4.5vw, 60px);
   padding-top: 32px;
   border-top: 1px solid var(--line-night);
   font-size: 14px;
@@ -310,7 +322,6 @@
 
 @media (max-width: 760px) {
   .fleet {
-    margin-top: -36px;
     border-radius: 36px 36px 0 0;
   }
 

@@ -3,17 +3,27 @@
   background: var(--paper);
 }
 
+/* On the services page the hero above supplies the heading and the spacing */
+.flush {
+  padding-top: 0;
+}
+
+.frameLink {
+  display: block;
+}
+
 .grid {
+  /* Right-hand column sits lower, for an editorial rhythm */
+  --stagger: 110px;
+  --column-gap: clamp(28px, 4vw, 64px);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(56px, 6vw, 96px) clamp(28px, 4vw, 64px);
-  padding-bottom: 110px;
+  gap: clamp(44px, 4.5vw, 72px) var(--column-gap);
   list-style: none;
 }
 
-/* Right-hand column sits lower, for an editorial rhythm */
 .item:nth-child(even) {
-  transform: translateY(110px);
+  transform: translateY(var(--stagger));
 }
 
 .card {
@@ -181,11 +191,35 @@
 
 @media (max-width: 1024px) {
   .grid {
-    padding-bottom: 64px;
+    --stagger: 64px;
+  }
+}
+
+@media (min-width: 641px) {
+  /* Room below a lowered right-hand card that ends the list */
+  .grid:has(> .item:last-child:nth-child(even)) {
+    padding-bottom: var(--stagger);
   }
 
-  .item:nth-child(even) {
-    transform: translateY(64px);
+  /* An odd last card fills its row instead of leaving a gap: picture in the left column,
+     text in the right column at that column's lower rhythm */
+  .item:last-child:nth-child(odd):not(:first-child) {
+    grid-column: 1 / -1;
+  }
+
+  .item:last-child:nth-child(odd):not(:first-child) .card {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--column-gap);
+    align-items: start;
+  }
+
+  .item:last-child:nth-child(odd):not(:first-child) .card > :last-child {
+    padding-top: var(--stagger);
+  }
+
+  .item:last-child:nth-child(odd):not(:first-child) .meta {
+    margin-top: 0;
   }
 }
 

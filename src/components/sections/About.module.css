@@ -164,11 +164,15 @@
   background: var(--gold);
 }
 
+.more {
+  margin-top: 30px;
+}
+
 /* Mission / vision */
 .pillars {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-top: clamp(80px, 10vw, 140px);
+  margin-top: clamp(56px, 7vw, 100px);
   border-top: 1px solid var(--line);
 }
 
@@ -211,7 +215,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  margin-top: clamp(64px, 8vw, 112px);
+  margin-top: clamp(44px, 5.5vw, 80px);
   list-style: none;
 }
 

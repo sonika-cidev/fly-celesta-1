@@ -67,7 +67,7 @@
 
 /* Cinematic frame */
 .mediaWrap {
-  margin-top: clamp(56px, 7vw, 96px);
+  margin-top: clamp(44px, 5.5vw, 76px);
 }
 
 .media {

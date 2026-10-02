@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import "lenis/dist/lenis.css";
 import "./globals.css";
-import { MotionProvider } from "@/components/motion/MotionProvider";
 
 const serif = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -18,9 +17,12 @@ const sans = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "Fly Celesta — Private Jet & Helicopter Charter",
+  title: {
+    default: "Fly Celesta — Private Jet & Helicopter Charter",
+    template: "%s — Fly Celesta",
+  },
   description:
-    "Helicopter and private jet charters, aircraft acquisitions, leasing and management from Bengaluru, India. Fly Celesta — beyond horizons.",
+    "Helicopter and private jet charters, aircraft sales, aviation consultancy and unmanned aviation systems from Bengaluru, India. Fly Celesta — beyond horizons.",
 };
 
 export const viewport: Viewport = {
@@ -35,9 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <style>{`[data-anim]{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
         </noscript>
       </head>
-      <body>
-        <MotionProvider>{children}</MotionProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

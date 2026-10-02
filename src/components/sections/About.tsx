@@ -3,12 +3,31 @@ import nilgiri from "@/assets/images/hero-nilgiri.jpg";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { LineRise } from "@/components/motion/LineRise";
 import { Reveal } from "@/components/motion/Reveal";
+import { Button } from "@/components/ui/Button";
 import { about } from "@/data/site";
 import styles from "./About.module.css";
 
 const numerals = ["I", "II", "III", "IV"];
 
-export function About() {
+type Card = { title: string; body: string };
+
+/** Numbered cards (Roman numerals) — the company values, reused on the career page. */
+export function ValueCards({ items, label }: { items: Card[]; label: string }) {
+  return (
+    <ul className={`container ${styles.values}`} aria-label={label}>
+      {items.map((value, i) => (
+        <Reveal as="li" key={value.title} delay={i * 0.08} className={styles.value}>
+          <span className={`serif ${styles.numeral}`}>{numerals[i]}</span>
+          <h3 className={`serif ${styles.valueTitle}`}>{value.title}</h3>
+          <p className={styles.valueBody}>{value.body}</p>
+        </Reveal>
+      ))}
+    </ul>
+  );
+}
+
+/** Story, mission & vision and values. `link` adds a text link under the story (home → company page). */
+export function About({ link }: { link?: { label: string; href: string } }) {
   return (
     <section id="about" className={styles.about} aria-labelledby="about-title">
       <div className={`container ${styles.intro}`}>
@@ -55,6 +74,13 @@ export function About() {
               ))}
             </ul>
           </Reveal>
+          {link && (
+            <Reveal delay={0.3} className={styles.more}>
+              <Button href={link.href} variant="text">
+                {link.label}
+              </Button>
+            </Reveal>
+          )}
         </div>
       </div>
 
@@ -73,15 +99,7 @@ export function About() {
         ))}
       </div>
 
-      <ul className={`container ${styles.values}`} aria-label="Our values">
-        {about.values.map((value, i) => (
-          <Reveal as="li" key={value.title} delay={i * 0.08} className={styles.value}>
-            <span className={`serif ${styles.numeral}`}>{numerals[i]}</span>
-            <h3 className={`serif ${styles.valueTitle}`}>{value.title}</h3>
-            <p className={styles.valueBody}>{value.body}</p>
-          </Reveal>
-        ))}
-      </ul>
+      <ValueCards items={about.values} label="Our values" />
     </section>
   );
 }

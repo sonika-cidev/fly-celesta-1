@@ -25,7 +25,9 @@
 
   --max: 1360px;
   --gutter: clamp(20px, 5vw, 72px);
-  --section: clamp(96px, 11vw, 168px);
+  --section: clamp(64px, 7.5vw, 112px);
+  /* How far a rounded panel (fleet, deals, footer…) slides up over the section before it */
+  --overlap: 56px;
   --radius-xl: 36px;
   --radius-lg: 28px;
   --radius-md: 20px;
@@ -114,6 +116,12 @@ button {
 .serif {
   font-family: var(--font-serif);
   font-variant-numeric: lining-nums;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --overlap: 36px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

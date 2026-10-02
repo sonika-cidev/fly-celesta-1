@@ -29,9 +29,14 @@ export function Fleet() {
       <div className="container">
         <Reveal className={styles.footnote}>
           <p>Specifications are indicative and vary by configuration. More aircraft are available on request.</p>
-          <Button href="#request" variant="light">
-            Request fleet options
-          </Button>
+          <div className={styles.footnoteActions}>
+            <Button href="/fleet" variant="text">
+              View the full fleet
+            </Button>
+            <Button href="#request" variant="light">
+              Request fleet options
+            </Button>
+          </div>
         </Reveal>
       </div>
     </section>

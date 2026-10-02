@@ -1,144 +1,4 @@
-.charter {
-  padding-block: var(--section);
-  background:
-    radial-gradient(60% 60% at 100% 100%, rgba(176, 141, 87, 0.12), transparent 60%),
-    var(--paper-deep);
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  align-items: start;
-  gap: clamp(40px, 6vw, 96px);
-}
-
-.aside {
-  min-width: 0;
-}
-
-.label {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--gold-deep);
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 0 5px rgba(176, 141, 87, 0.16);
-}
-
-.title {
-  margin-top: 20px;
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(46px, 5.6vw, 84px);
-  line-height: 0.98;
-  letter-spacing: -0.015em;
-}
-
-.title em {
-  font-style: italic;
-  color: var(--gold-deep);
-}
-
-.lede {
-  max-width: 420px;
-  margin-top: 26px;
-  font-size: 16px;
-  font-weight: 300;
-  line-height: 1.85;
-  color: var(--muted);
-}
-
-.concierge {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  margin-top: 40px;
-}
-
-/* Wide frame close to the photo's own proportions, so the whole helicopter shows */
-.window {
-  aspect-ratio: 2 / 1;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-}
-
-.window::after {
-  content: "";
-  position: absolute;
-  inset: 10px;
-  z-index: 2;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: calc(var(--radius-lg) - 10px);
-  pointer-events: none;
-}
-
-.windowImage {
-  object-fit: cover;
-}
-
-.contact {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 24px;
-  list-style: none;
-}
-
-.contact li:last-child {
-  grid-column: 1 / -1;
-}
-
-.contact li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 16px;
-  line-height: 1.6;
-}
-
-.contact li > span {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold-deep);
-}
-
-.contact a {
-  color: var(--ink);
-  transition: color 0.3s;
-}
-
-.contact a:hover {
-  color: var(--gold-deep);
-}
-
-.contact address {
-  display: flex;
-  flex-direction: column;
-  font-style: normal;
-  font-size: 14px;
-  color: var(--muted);
-}
-
-/* Concierge form card */
-.card {
-  position: relative;
-  padding: clamp(26px, 3.6vw, 52px);
-  border-radius: var(--radius-xl);
-  background: var(--white);
-  box-shadow: var(--shadow-soft);
-}
-
+/* Shared by the charter request and enquiry forms. */
 .form {
   position: relative;
   display: flex;
@@ -602,34 +462,117 @@
   color: var(--paper);
 }
 
-@media (max-width: 1024px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
+/* Security question (arithmetic CAPTCHA) */
+.captchaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
 
-  .concierge {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: center;
+.question {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 136px;
+  height: 52px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+
+.question svg {
+  display: block;
+  width: 120px;
+  height: 46px;
+}
+
+/* The digits in ink, the noise strokes in champagne */
+.question svg path:not([fill="none"]) {
+  fill: var(--ink);
+}
+
+.question svg path[fill="none"] {
+  stroke: var(--gold);
+  stroke-opacity: 0.75;
+}
+
+.questionLoading {
+  background: linear-gradient(100deg, var(--paper) 30%, var(--paper-deep) 50%, var(--paper) 70%) 0 0 / 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+.questionFailed {
+  width: auto;
+  padding-inline: 14px;
+  font-size: 13px;
+  color: #b4442f;
+}
+
+.equals {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.answer {
+  width: 92px;
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+
+.refresh {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+  transition:
+    background-color 0.4s var(--ease),
+    color 0.4s var(--ease),
+    border-color 0.4s var(--ease);
+}
+
+.refresh svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.6s var(--ease);
+}
+
+.refresh:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--gold-soft);
+}
+
+.refresh:hover svg {
+  transform: rotate(-180deg);
+}
+
+.captchaHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.captchaHint a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
   }
 }
 
 @media (max-width: 600px) {
-  .card {
-    margin-inline: calc(-1 * var(--gutter) + 10px);
-    padding: 24px 18px;
-    border-radius: var(--radius-lg);
-  }
-
-  .concierge {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .contact {
-    grid-template-columns: 1fr;
-  }
-
   .split {
     grid-template-columns: 1fr;
   }
