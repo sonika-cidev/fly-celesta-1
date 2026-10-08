@@ -37,7 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <style>{`[data-anim]{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
         </noscript>
       </head>
-      <body>{children}</body>
+      {/* Browser extensions (Grammarly, password managers) add attributes to <body> before React hydrates.
+          This only ignores <body>'s own attributes; everything inside it is still checked. */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
