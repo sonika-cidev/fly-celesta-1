@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
+import { KIND_LABEL, charterRows, formatReceived } from "@/lib/inquiry-display";
 import { hasSession } from "@/lib/server/admin-session";
 import { listInquiries } from "@/lib/server/inquiries";
 import { StoreUnavailableError, type Inquiry, type InquiryKind, type InquiryPage } from "@/lib/server/store";
@@ -19,21 +20,6 @@ const TABS: { kind?: InquiryKind; label: string }[] = [
   { kind: "enquiry", label: "Enquiries" },
   { kind: "career", label: "Careers" },
 ];
-
-const KIND_LABEL: Record<InquiryKind, string> = { charter: "Charter request", enquiry: "Enquiry", career: "Career" };
-
-const when = new Intl.DateTimeFormat("en-IN", {
-  timeZone: "Asia/Kolkata",
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-});
-
-const day = new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" });
-const formatDate = (iso?: string) => (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso) ? day.format(new Date(`${iso}T00:00:00Z`)) : iso);
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
@@ -124,24 +110,13 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 }
 
 function InquiryCard({ inquiry }: { inquiry: Inquiry }) {
-  const d = inquiry.details;
-  const charterRows =
-    inquiry.kind === "charter"
-      ? [
-          ["Route", d.from && d.to ? `${d.from} → ${d.to}` : undefined],
-          ["Trip", d.tripType],
-          ["Departure", formatDate(d.departureDate)],
-          ["Return", formatDate(d.returnDate)],
-          ["Passengers", d.passengers],
-          ["Aircraft", d.aircraftType],
-        ].filter((row): row is [string, string] => Boolean(row[1]))
-      : [];
+  const details = charterRows(inquiry);
 
   return (
     <li className={styles.card}>
       <div className={styles.cardHead}>
         <time dateTime={inquiry.createdAt.toISOString()} className={styles.time}>
-          {when.format(inquiry.createdAt)} IST
+          {formatReceived(inquiry.createdAt)}
         </time>
         <span className={styles.badge} data-kind={inquiry.kind}>
           {KIND_LABEL[inquiry.kind]}
@@ -155,9 +130,9 @@ function InquiryCard({ inquiry }: { inquiry: Inquiry }) {
         {inquiry.phone && <a href={`tel:${inquiry.phone.replace(/[^\d+]/g, "")}`}>{inquiry.phone}</a>}
       </p>
 
-      {charterRows.length > 0 && (
+      {details.length > 0 && (
         <dl className={styles.details}>
-          {charterRows.map(([label, value]) => (
+          {details.map(([label, value]) => (
             <div key={label}>
               <dt>{label}</dt>
               <dd>{value}</dd>

@@ -38,6 +38,9 @@ Follows the client's sitemap:
 - **Inquiry inbox** — every accepted submission is stored and listed at **`/admin`** (newest first, 10 per page with
   numbered pages, date and time in IST, contact details, charter details and message; filter by charter requests,
   enquiries or careers). Sign in with the admin password.
+- **Email notification** — with SMTP configured (below), each accepted submission is also emailed to `MAIL_TO`, with
+  Reply-To set to the visitor when they gave an email address. It is sent after the visitor sees the confirmation; if
+  sending fails, the error is logged as `[mail] …` and the inquiry is still in `/admin`.
 
 ## Environment variables
 
@@ -45,6 +48,12 @@ Follows the client's sitemap:
 | --- | --- | --- |
 | `DATABASE_URL` | Production | MySQL (or MariaDB) connection string where inquiries are stored, e.g. `mysql://user:password@host:3306/database`. The tables are created automatically. |
 | `ADMIN_PASSWORD` | Yes, for `/admin` | Password for the inquiry inbox — at least 12 characters. Changing it signs everyone out. |
+| `SMTP_HOST` | For email | Mail server that sends the notification emails, e.g. `mail.example.com`. Nothing is emailed without it. |
+| `SMTP_CRYPTO` | Optional | `ssl` (port 465, the default), `tls` (STARTTLS, port 587) or `none`. |
+| `SMTP_PORT` | Optional | Only for a non-standard port. |
+| `SMTP_USER` / `SMTP_PASSWORD` | For email | Mailbox login on that server. |
+| `MAIL_TO` | Optional | Who receives the emails, comma-separated. Defaults to `SMTP_USER`. |
+| `MAIL_FROM` | Optional | Sender address. Defaults to `SMTP_USER`; most servers only send from their own mailboxes. |
 | `INQUIRY_WEBHOOK_URL` | Optional | Also POST each new inquiry as JSON to this URL (e.g. a Zapier/Make webhook that emails the team). |
 
 Without `DATABASE_URL` in production, the forms tell visitors to call or email instead of accepting a request — nothing is

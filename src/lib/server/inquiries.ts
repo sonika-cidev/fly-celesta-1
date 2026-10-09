@@ -3,6 +3,7 @@ import { after } from "next/server";
 import { site } from "@/data/site";
 import { CAPTCHA_ANSWER_FIELD, CAPTCHA_TOKEN_FIELD, PAGE_FIELD } from "@/lib/forms";
 import { verifyChallenge, type CaptchaResult } from "./captcha";
+import { emailInquiry } from "./mailer";
 import { getStore, StoreUnavailableError, type Inquiry, type InquiryKind, type NewInquiry } from "./store";
 
 export type SubmissionFailure = {
@@ -54,10 +55,15 @@ export async function storeSubmission(formData: FormData, inquiry: NewInquiry): 
 }
 
 /**
- * Optional: forwards each stored inquiry as JSON to INQUIRY_WEBHOOK_URL (e.g. a Zapier/Make
- * webhook that emails the team). The admin panel remains the record of every inquiry.
+ * Tells the team about a stored inquiry, after the visitor already has their answer: by email when SMTP is
+ * configured (see mailer.ts) and/or as JSON to a webhook. The admin panel remains the record of every inquiry.
  */
 async function notify(inquiry: Inquiry) {
+  await Promise.all([emailInquiry(inquiry), postToWebhook(inquiry)]);
+}
+
+/** Optional: forwards each stored inquiry as JSON to INQUIRY_WEBHOOK_URL (e.g. a Zapier/Make webhook). */
+async function postToWebhook(inquiry: Inquiry) {
   const url = process.env.INQUIRY_WEBHOOK_URL || process.env.CHARTER_REQUEST_WEBHOOK_URL;
   if (!url) return;
   try {

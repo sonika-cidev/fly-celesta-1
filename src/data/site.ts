@@ -4,6 +4,7 @@ export const site = {
   name: "Fly Celesta",
   legalName: "Fly Celesta Private Limited",
   tagline: "Beyond Horizons",
+  url: "https://flycelesta.in",
   email: "sales@flycelesta.in",
   phone: "+ 91 90 72 789 789",
   phoneHref: "tel:+919188037000",
