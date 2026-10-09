@@ -38,7 +38,7 @@ export async function submitCharterRequest(
     kind: "charter",
     topic: `Charter request · ${request.aircraftType}`,
     name: request.name,
-    email: request.email,
+    email: "",
     phone: request.phone,
     message: request.requirements,
     details: {

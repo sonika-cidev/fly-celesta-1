@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 34px;
+  container-type: inline-size;
 }
 
 /* Brief champagne wash when another section pre-fills the form */
@@ -51,7 +52,7 @@
 /* Aircraft type cards */
 .group {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -120,6 +121,17 @@
   grid-template-columns: 1fr 1fr;
   align-items: start;
   gap: 18px;
+}
+
+.detailsSplit {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+@container (max-width: 460px) {
+  .detailsSplit {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
 /* Height of a field label plus its gap, for controls that sit level with labelled inputs */
@@ -341,8 +353,73 @@
 
 .phone {
   display: grid;
-  grid-template-columns: minmax(130px, 0.42fr) 1fr;
-  gap: 10px;
+  grid-template-columns: minmax(105px, auto) minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  transition:
+    border-color 0.35s var(--ease),
+    background-color 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
+.phone:hover {
+  border-color: var(--line);
+}
+
+.phone:focus-within {
+  border-color: var(--gold);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(176, 141, 87, 0.14);
+}
+
+.phone .input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 13px 14px;
+}
+
+.phone .input::placeholder {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.phone .input:hover,
+.phone .input:focus {
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.phone .select {
+  border-right: 1px solid var(--line);
+  padding: 13px 26px 13px 12px;
+  font-size: 14px;
+  background-position:
+    right 13px center,
+    right 9px center;
+  background-size: 4px 4px;
+  white-space: nowrap;
+}
+
+.invalid .phone {
+  border-color: #b4442f;
+  background: #fdf6f4;
+}
+
+.invalid .phone .input {
+  border-color: transparent;
+  background-color: transparent;
 }
 
 .footer {
@@ -590,8 +667,9 @@
   }
 }
 
-@media (max-width: 600px) {
-  .split {
+@media (max-width: 640px) {
+  .split,
+  .detailsSplit {
     grid-template-columns: 1fr;
   }
 
@@ -616,7 +694,7 @@
   }
 
   .phone {
-    grid-template-columns: minmax(118px, 0.6fr) 1fr;
+    grid-template-columns: minmax(105px, auto) minmax(0, 1fr);
   }
 
   .submit {

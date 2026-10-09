@@ -15,7 +15,6 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { submitCharterRequest } from "@/app/actions/charter-request";
 import {
-  AIRCRAFT_TYPES,
   BOOKING_WINDOW_DAYS,
   COUNTRY_CODES,
   MAX_PASSENGERS,
@@ -40,12 +39,14 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
 
 type FieldName = keyof CharterFields | "captcha";
+const REQUEST_AIRCRAFT_TYPES = ["Helicopter", "Private Jet"] as const satisfies readonly AircraftType[];
+const REQUEST_AIRCRAFT_TYPE_SET = new Set<AircraftType>(REQUEST_AIRCRAFT_TYPES);
 
 /** On-screen order, so a failed submit lands on the first problem. */
-const ORDER: readonly FieldName[] = ["passengers", "from", "to", "departureDate", "returnDate", "name", "email", "phone", "requirements", "captcha"];
+const ORDER: readonly FieldName[] = ["passengers", "from", "to", "departureDate", "returnDate", "name", "phone", "requirements", "captcha"];
 
 /** Single-line fields tidied (trimmed, single spaces) when the visitor leaves them. */
-const SINGLE_LINE = new Set<keyof CharterFields>(["from", "to", "name", "email", "phone"]);
+const SINGLE_LINE = new Set<keyof CharterFields>(["from", "to", "name", "phone"]);
 
 const initialState: CharterRequestState = { status: "idle" };
 
@@ -58,7 +59,6 @@ const emptyFields: CharterFields = {
   returnDate: "",
   passengers: "2",
   name: "",
-  email: "",
   countryCode: "+91",
   phone: "",
   requirements: "",
@@ -80,7 +80,7 @@ const iconProps = {
   strokeLinejoin: "round",
 } as const;
 
-const aircraftIcons: Record<AircraftType, ReactNode> = {
+const aircraftIcons: Record<(typeof REQUEST_AIRCRAFT_TYPES)[number], ReactNode> = {
   Helicopter: (
     <svg {...iconProps}>
       <path d="M4 7h18M13 7v3" />
@@ -91,12 +91,6 @@ const aircraftIcons: Record<AircraftType, ReactNode> = {
   "Private Jet": (
     <svg {...iconProps}>
       <path d="M16 3c1 0 1.7 1.2 1.7 2.6V12l10.3 6v2.4l-10.3-3.2v5.6l3 2.2V27L16 25.8 11.3 27v-2l3-2.2v-5.6L4 20.4V18l10.3-6V5.6C14.3 4.2 15 3 16 3z" />
-    </svg>
-  ),
-  Turboprop: (
-    <svg {...iconProps}>
-      <path d="M16 3c.9 0 1.5 1 1.5 2.3V12h10.5v2.6l-10.5 1.6v6.4l3 2V27L16 26l-4.5 1v-2.4l3-2v-6.4L4 14.6V12h10.5V5.3C14.5 4 15.1 3 16 3z" />
-      <path d="M8.5 9.5v5M23.5 9.5v5" />
     </svg>
   ),
 };
@@ -139,9 +133,10 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
   useEffect(() => {
     const onPrefill = (event: Event) => {
       const detail = (event as CustomEvent<CharterPrefill>).detail;
+      const aircraftType = detail.aircraftType && REQUEST_AIRCRAFT_TYPE_SET.has(detail.aircraftType) ? detail.aircraftType : undefined;
       setValues((v) => ({
         ...v,
-        ...(detail.aircraftType && { aircraftType: detail.aircraftType }),
+        ...(aircraftType && { aircraftType }),
         ...(detail.from && { from: detail.from }),
         ...(detail.to && { to: detail.to }),
         ...(detail.departureDate && { departureDate: detail.departureDate }),
@@ -203,7 +198,8 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
     return (
       <FormSuccess
         firstName={state.firstName}
-        text="Your charter request is with our team. We’ll be in touch shortly with aircraft options and a quote."
+        title="Thank you for choosing Fly Celesta."
+        text="Our charter team will contact you shortly with suitable options and a quotation."
         againLabel="Plan another flight"
         onAgain={onReset}
       />
@@ -231,7 +227,7 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
         </legend>
 
         <div className={styles.group} role="radiogroup" aria-label="Aircraft type">
-          {AIRCRAFT_TYPES.map((type) => {
+          {REQUEST_AIRCRAFT_TYPES.map((type) => {
             const checked = values.aircraftType === type;
             return (
               <label key={type} className={styles.typeOption} data-checked={checked}>
@@ -364,55 +360,42 @@ function CharterFormInner({ onReset }: { onReset: () => void }) {
           <span>02</span> Your details
         </legend>
 
-        <div className={styles.split}>
+        <div className={`${styles.split} ${styles.detailsSplit}`}>
           <Field id={fieldId("name")} label="Full name" error={form.errorFor("name")}>
             <input {...bind("name")} autoComplete="name" autoCapitalize="words" maxLength={LIMITS.name} required className={styles.input} />
           </Field>
-          <Field id={fieldId("email")} label="Email" error={form.errorFor("email")}>
-            <input
-              {...bind("email")}
-              type="email"
-              autoComplete="email"
-              autoCapitalize="none"
-              spellCheck={false}
-              maxLength={LIMITS.email}
-              required
-              className={styles.input}
-            />
+          <Field id={fieldId("phone")} label="Phone" error={form.errorFor("phone")}>
+            <div className={styles.phone}>
+              <select
+                id={fieldId("countryCode")}
+                name="countryCode"
+                value={values.countryCode}
+                onChange={(e) => {
+                  update("countryCode", e.target.value);
+                  form.changed("phone");
+                }}
+                aria-label="Country code"
+                className={`${styles.input} ${styles.select}`}
+              >
+                {COUNTRY_CODES.map((c) => (
+                  <option key={c.code + c.label} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                {...bind("phone", phoneCharacters)}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                maxLength={LIMITS.phone}
+                placeholder={country?.code === "+91" ? "Mobile Number" : "Phone number"}
+                required
+                className={styles.input}
+              />
+            </div>
           </Field>
         </div>
-
-        <Field id={fieldId("phone")} label="Phone" error={form.errorFor("phone")}>
-          <div className={styles.phone}>
-            <select
-              id={fieldId("countryCode")}
-              name="countryCode"
-              value={values.countryCode}
-              onChange={(e) => {
-                update("countryCode", e.target.value);
-                form.changed("phone");
-              }}
-              aria-label="Country code"
-              className={`${styles.input} ${styles.select}`}
-            >
-              {COUNTRY_CODES.map((c) => (
-                <option key={c.code + c.label} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <input
-              {...bind("phone", phoneCharacters)}
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel-national"
-              maxLength={LIMITS.phone}
-              placeholder={country?.code === "+91" ? "10-digit mobile number" : "Phone number"}
-              required
-              className={styles.input}
-            />
-          </div>
-        </Field>
 
         <Field
           id={fieldId("requirements")}

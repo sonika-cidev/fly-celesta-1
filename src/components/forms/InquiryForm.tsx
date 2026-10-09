@@ -195,7 +195,7 @@ function InquiryFormInner({
               inputMode="tel"
               autoComplete="tel-national"
               maxLength={LIMITS.phone}
-              placeholder={values.countryCode === "+91" ? "10-digit mobile number" : "Phone number"}
+              placeholder={values.countryCode === "+91" ? "Mobile Number" : "Phone number"}
               className={styles.input}
             />
           </div>

@@ -10,13 +10,14 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 type FormSuccessProps = {
   firstName: string;
+  title?: string;
   text: string;
   againLabel: string;
   onAgain: () => void;
 };
 
 /** Animated confirmation; scrolls itself into view because it's much shorter than the form. */
-export function FormSuccess({ firstName, text, againLabel, onAgain }: FormSuccessProps) {
+export function FormSuccess({ firstName, title, text, againLabel, onAgain }: FormSuccessProps) {
   const ref = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
 
@@ -45,7 +46,7 @@ export function FormSuccess({ firstName, text, againLabel, onAgain }: FormSucces
         <motion.path d="M20 33l8 8 16-18" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6, duration: 0.5, ease: EASE }} />
       </svg>
       <h3 className={`serif ${styles.successTitle}`}>
-        Thank you, <em>{firstName}.</em>
+        {title ? <em>{title}</em> : <>Thank you, <em>{firstName}.</em></>}
       </h3>
       <p className={styles.successText}>{text}</p>
       <button type="button" className={styles.again} onClick={onAgain}>

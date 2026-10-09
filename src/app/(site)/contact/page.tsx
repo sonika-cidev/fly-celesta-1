@@ -7,7 +7,7 @@ import { INQUIRY_TOPICS } from "@/lib/inquiry";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Fly Celesta in Bengaluru — call +91 91 88 03 7000, email connect@flycelesta.in or send us a message.",
+  description: "Contact Fly Celesta in Bengaluru — call + 91 90 72 789 789, email sales@flycelesta.in or send us a message.",
 };
 
 export default function ContactPage() {

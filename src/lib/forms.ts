@@ -100,7 +100,7 @@ export function phoneError(phone: string, countryCode: string, required: boolean
   if (!phone) return required ? "Enter your phone number." : undefined;
   if (/[^\d\s()+.-]/.test(phone)) return "Use digits only.";
   if (nationalNumber(phone, countryCode)) return undefined;
-  if (country.code === "+91") return "Enter a valid 10-digit mobile number.";
+  if (country.code === "+91") return "Enter a valid Mobile Number.";
   const length = country.min === country.max ? `${country.min}-digit` : `${country.min}–${country.max} digit`;
   return `Enter a valid ${length} phone number.`;
 }

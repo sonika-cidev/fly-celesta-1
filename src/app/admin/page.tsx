@@ -151,7 +151,7 @@ function InquiryCard({ inquiry }: { inquiry: Inquiry }) {
 
       <h2 className={`serif ${styles.name}`}>{inquiry.name}</h2>
       <p className={styles.contact}>
-        <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>
+        {inquiry.email ? <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a> : <span>Email not provided</span>}
         {inquiry.phone && <a href={`tel:${inquiry.phone.replace(/[^\d+]/g, "")}`}>{inquiry.phone}</a>}
       </p>
 

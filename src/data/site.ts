@@ -4,8 +4,8 @@ export const site = {
   name: "Fly Celesta",
   legalName: "Fly Celesta Private Limited",
   tagline: "Beyond Horizons",
-  email: "connect@flycelesta.in",
-  phone: "+91 91 88 03 7000",
+  email: "sales@flycelesta.in",
+  phone: "+ 91 90 72 789 789",
   phoneHref: "tel:+919188037000",
   address: ["Prestige Shantiniketan, 10th Floor, Tower B", "ITPL Main Rd, Whitefield", "Bengaluru 560048, Karnataka, India"],
 };

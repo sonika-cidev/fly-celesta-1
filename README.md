@@ -75,6 +75,25 @@ Special characters in the password must be URL-encoded (`@` → `%40`, `#` → `
    If a Neon/Postgres database was connected to the project earlier, disconnect it so it no longer sets `DATABASE_URL`.
 3. Redeploy, then visit `/admin` and sign in.
 
+## Deploying on DirectAdmin / cPanel (Setup Node.js App)
+
+```bash
+npm run package:hosting   # → deploy/fly-celesta-hosting.zip
+```
+
+The script builds the standalone server and makes it portable to a Linux host: it adds the static assets, drops
+`.data/`, replaces Turbopack's links for `mysql2`/`svg-captcha` with real copies, and swaps sharp's binaries for Linux
+x64 ones (plus the WebAssembly build as a fallback for older Linux).
+
+1. **Setup Node.js App** → create an app: Node.js 20 or newer, mode Production, an application root such as
+   `flycelesta-app` (outside `public_html`), application URL the domain, startup file `server.js`.
+2. Upload the zip into the application root and extract it there, so `server.js` sits at the top level.
+   Do **not** press "Run NPM Install": everything the server needs is already in the zip.
+3. Add the environment variables `DATABASE_URL` (`mysql://user:password@localhost:3306/database`) and `ADMIN_PASSWORD`,
+   then restart the app.
+
+To update the site, run the script again, upload and extract over the old files, and restart the app.
+
 ## Structure
 
 ```

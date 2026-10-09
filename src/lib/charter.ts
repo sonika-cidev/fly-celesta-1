@@ -2,7 +2,6 @@
 import {
   LIMITS,
   capitalizeWords,
-  emailError,
   formatPhone,
   nameError,
   phoneError,
@@ -53,7 +52,6 @@ export type CharterFields = {
   returnDate: string;
   passengers: string;
   name: string;
-  email: string;
   countryCode: string;
   phone: string;
   requirements: string;
@@ -68,7 +66,6 @@ export const CHARTER_FIELD_NAMES = [
   "returnDate",
   "passengers",
   "name",
-  "email",
   "countryCode",
   "phone",
   "requirements",
@@ -122,7 +119,6 @@ export function tidyCharter(f: CharterFields): CharterFields {
     returnDate: tidy(f.returnDate),
     passengers: tidy(f.passengers),
     name: tidy(f.name),
-    email: tidy(f.email),
     countryCode: tidy(f.countryCode),
     phone: tidy(f.phone),
     requirements: f.requirements.trim(),
@@ -156,8 +152,6 @@ export function validateCharter(f: CharterFields, window: DateWindow = {}): Char
 
   const name = nameError(f.name);
   if (name) errors.name = name;
-  const email = emailError(f.email);
-  if (email) errors.email = email;
   const phone = phoneError(f.phone, f.countryCode, true);
   if (phone) errors.phone = phone;
   if (f.requirements.length > LIMITS.requirements) errors.requirements = `Use ${LIMITS.requirements.toLocaleString("en-IN")} characters or fewer.`;
