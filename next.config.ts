@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "/*": ["./.data/**/*"],
   },
+  experimental: {
+    serverActions: {
+      // Blog image uploads from the admin editor (shrunk in the browser to 3 MB at most) plus form overhead.
+      bodySizeLimit: "4mb",
+    },
+  },
 };
 
 export default nextConfig;

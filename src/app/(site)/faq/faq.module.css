@@ -1,0 +1,92 @@
+.faq {
+  padding-bottom: var(--section);
+  background: var(--paper);
+}
+
+/* Topic index on the left, staying in view; the question groups on the right */
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(40px, 6vw, 112px);
+}
+
+.toc {
+  position: sticky;
+  top: 120px;
+}
+
+.tocLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.toc ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  list-style: none;
+}
+
+.toc a {
+  display: block;
+  padding: 8px 0 8px 16px;
+  border-left: 1px solid var(--line-strong);
+  font-size: 15px;
+  color: var(--ink-soft);
+  transition:
+    border-color 0.3s,
+    color 0.3s;
+}
+
+.toc a:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(56px, 6vw, 88px);
+  min-width: 0;
+}
+
+.group {
+  scroll-margin-top: 110px;
+}
+
+.groupTitle {
+  margin-bottom: 18px;
+  font-size: clamp(32px, 3.2vw, 44px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* The topics become a row of chips above the questions */
+  .toc {
+    position: static;
+  }
+
+  .toc ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .toc a {
+    padding: 8px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 14px;
+  }
+}

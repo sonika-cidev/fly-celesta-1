@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Logo } from "@/components/brand/Logo";
 import { KIND_LABEL, charterRows, formatReceived } from "@/lib/inquiry-display";
 import { hasSession } from "@/lib/server/admin-session";
 import { listInquiries } from "@/lib/server/inquiries";
 import { StoreUnavailableError, type Inquiry, type InquiryKind, type InquiryPage } from "@/lib/server/store";
-import { logout } from "./actions";
+import { AdminHeader } from "./AdminHeader";
 import { Pagination } from "./Pagination";
 import styles from "./admin.module.css";
 
@@ -59,18 +58,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
   return (
     <main className={styles.page}>
-      <header className={styles.top}>
-        <div className={styles.brand}>
-          <Logo width={118} />
-          <span className={styles.divider} aria-hidden="true" />
-          <h1 className={`serif ${styles.heading}`}>Inquiries</h1>
-        </div>
-        <form action={logout}>
-          <button type="submit" className={styles.ghost}>
-            Sign out
-          </button>
-        </form>
-      </header>
+      <AdminHeader title="Inquiries" section="inquiries" />
 
       <nav className={styles.tabs} aria-label="Filter inquiries">
         {TABS.map((tab) => (

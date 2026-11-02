@@ -19,8 +19,12 @@ Follows the client's sitemap:
 | Services | `/services` and one page per service: `/services/charter-services`, `/aircraft-for-sale`, `/aircraft-wanted`, `/aviation-consultancy`, `/unmanned-aviation-systems` |
 | About | `/about` (Company) and `/about/career` (Career) |
 | Fleet | `/fleet` — Business Jets, Helicopters and Turboprops (`#business-jets`, `#helicopters`, `#turboprops`) |
+| Blog | `/blog` (newest article featured, then 9 per page) and one page per article: `/blog/<address>` |
+| FAQs | `/faq` (in the About menu); the most-asked questions also appear on the home page |
 | Contact | `/contact` |
-| Inquiry inbox (private) | `/admin` |
+| Admin panel (private) | `/admin` — inquiry inbox · `/admin/blog` — blog posts |
+
+The home page also shows the three newest blog articles (only once something is published) and a FAQ section.
 
 ## Forms, CAPTCHA and the inquiry inbox
 
@@ -42,12 +46,34 @@ Follows the client's sitemap:
   Reply-To set to the visitor when they gave an email address. It is sent after the visitor sees the confirmation; if
   sending fails, the error is logged as `[mail] …` and the inquiry is still in `/admin`.
 
+## Blog
+
+Articles are written and published from the admin panel: sign in at **`/admin`**, then **Blog** → **New post**.
+
+- **Writing** — title, web address (filled in from the title), the article, and an optional excerpt for the blog page and
+  search results (otherwise the opening of the article is used). The toolbar adds headings, bold and italic, links, lists,
+  quotations, dividers and images; **Preview** shows the article as it will appear. Ctrl+S saves. The article is written
+  in a small Markdown-like format (`## Heading`, `**bold**`, `[link](https://…)`, `- item`, `> quote`…), with
+  *Formatting help* under the editor; it is rendered by the site itself, so no HTML or scripts can be added.
+- **Images** — a cover image, and images within the article. They are resized in the browser (2000 px on the long edge,
+  WebP or JPEG) and stored in the database, so they survive redeploys and need no writable folder on the host. Every image
+  in an article needs a short description. Images no post uses any more are removed a day after upload.
+- **Publishing** — *Draft* (visible only in the admin panel) or *Published*. The optional publish date backdates a post,
+  or schedules it: a future date keeps it off the website until that day (India time).
+- Blog pages are rendered for each visit from the database, so changes appear on the website immediately. Articles get
+  their own title, description, social-sharing image and `BlogPosting` structured data.
+
+## FAQs
+
+The questions and answers are in `src/data/faq.ts`, grouped by topic. `featured: true` also shows a question on the
+home page. The `/faq` page includes `FAQPage` structured data for search engines.
+
 ## Environment variables
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | Production | MySQL (or MariaDB) connection string where inquiries are stored, e.g. `mysql://user:password@host:3306/database`. The tables are created automatically. |
-| `ADMIN_PASSWORD` | Yes, for `/admin` | Password for the inquiry inbox — at least 12 characters. Changing it signs everyone out. |
+| `DATABASE_URL` | Production | MySQL (or MariaDB) connection string where inquiries and blog posts are stored, e.g. `mysql://user:password@host:3306/database`. The tables are created automatically. |
+| `ADMIN_PASSWORD` | Yes, for `/admin` | Password for the admin panel (inquiries and blog) — at least 12 characters. Changing it signs everyone out. |
 | `SMTP_HOST` | For email | Mail server that sends the notification emails, e.g. `mail.example.com`. Nothing is emailed without it. |
 | `SMTP_CRYPTO` | Optional | `ssl` (port 465, the default), `tls` (STARTTLS, port 587) or `none`. |
 | `SMTP_PORT` | Optional | Only for a non-standard port. |
@@ -57,7 +83,8 @@ Follows the client's sitemap:
 | `INQUIRY_WEBHOOK_URL` | Optional | Also POST each new inquiry as JSON to this URL (e.g. a Zapier/Make webhook that emails the team). |
 
 Without `DATABASE_URL` in production, the forms tell visitors to call or email instead of accepting a request — nothing is
-silently lost. In local development (`npm run dev`) inquiries are saved to `.data/dev-store.json` instead.
+silently lost — and the blog shows no articles. In local development (`npm run dev`) without a database, inquiries and
+posts are saved to `.data/dev-store.json` (uploaded images to `.data/images/`) instead.
 
 For local development create `.env.local` (git-ignored):
 
@@ -68,9 +95,11 @@ ADMIN_PASSWORD=choose-a-long-password
 
 ## Database
 
-MySQL 5.7+ / 8.x or MariaDB 10.3+. Create an empty database and a user with `CREATE`, `SELECT`, `INSERT`, `DELETE`
-and `INDEX` rights on it; on first use the site creates three tables: `fc_inquiries` (the submissions), `fc_used_tokens`
-(answered CAPTCHA questions) and `fc_settings` (a random signing key). The `fc_` prefix lets them share a database with
+MySQL 5.7+ / 8.x or MariaDB 10.3+. Create an empty database and a user with `CREATE`, `SELECT`, `INSERT`, `UPDATE`,
+`DELETE` and `INDEX` rights on it (on cPanel, *All privileges* is simplest); on first use the site creates its tables:
+`fc_inquiries` (the submissions), `fc_used_tokens` (answered CAPTCHA questions), `fc_settings` (a random signing key),
+`fc_posts` (blog posts) and `fc_images` (images uploaded for the blog). A database already in use by an earlier version
+gains the blog tables automatically — there is nothing to import. The `fc_` prefix lets the tables share a database with
 another application. Times are stored in UTC and shown in IST.
 
 If the server requires TLS, add it to the URL: `mysql://user:password@host:3306/database?ssl={"rejectUnauthorized":true}`.
@@ -107,24 +136,29 @@ To update the site, run the script again, upload and extract over the old files,
 
 ```
 src/
-  app/(site)/           public pages (layout adds header, footer, smooth scrolling)
-  app/admin/            private inquiry inbox: sign-in, list, sign-out
+  app/(site)/           public pages (layout adds header, footer, smooth scrolling), including blog/ and faq/
+  app/admin/            private admin panel: sign-in, inquiry inbox, sign-out
+  app/admin/blog/       blog posts: list, editor (toolbar, preview, image upload), server actions
+  app/media/            serves images uploaded for the blog (/media/<id>.webp)
   app/api/captcha/      issues CAPTCHA questions
   app/actions/          server actions for the charter and enquiry forms
   assets/               logo (colour + reversed) and photography
+  components/blog/      PostBody (renders an article), PostCard and grid, pagination
   components/forms/     CharterForm, InquiryForm, MathCaptcha, shared field styles
   components/layout/    Header (dropdown nav, menu sheet), Footer, PageHero, RouteSync
-  components/sections/  page sections (Hero, Services, About, Fleet, Deals, FormSection, …)
+  components/sections/  page sections (Hero, Services, About, Fleet, Deals, LatestPosts, Faq, FormSection, …)
   components/motion/    Reveal, ImageReveal, LineRise, Swoosh, MotionProvider
-  data/                 navigation, services, fleet, deals and site copy
-  lib/                  form validation shared by browser and server
-  lib/server/           inquiry storage, CAPTCHA, admin session (server only)
+  data/                 navigation, services, fleet, deals, FAQs and site copy
+  lib/                  form and blog-post validation shared by browser and server, the article format (blog-markup)
+  lib/server/           storage (inquiries, posts, images), CAPTCHA, admin session (server only)
 ```
 
 ## Before launch
 
 - **Copy to confirm with the client:** the five service pages (Unmanned Aviation Systems is new), the career page and
-  the mission/vision wording were drafted from the current flycelesta.in content.
+  the mission/vision wording were drafted from the current flycelesta.in content. The FAQ answers (`src/data/faq.ts`)
+  were drafted from that copy and general charter practice — confirm them too, especially pricing, documents and
+  helicopter landing permissions.
 - **Fleet specifications** are as published on flycelesta.in and indicative.
 - **Photography** is from Wikimedia Commons, mostly under CC BY / CC BY-SA, which require visible credit. The footer no
   longer lists credits, so replace these photos with ones the client owns or licenses, or publish the credits again —

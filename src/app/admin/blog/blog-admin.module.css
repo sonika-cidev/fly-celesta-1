@@ -1,0 +1,633 @@
+/* Blog management: the post list and the editor, in the admin's plain porcelain style */
+
+/* ---------------------------------------------------------------- Post list */
+.listBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.count {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.newPost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  transition: background-color 0.3s;
+}
+
+.newPost:hover {
+  background: var(--ink-soft);
+}
+
+.newPost span {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px 14px 14px;
+  border: 1px solid rgba(15, 27, 49, 0.06);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: 0 14px 30px -26px rgba(15, 27, 49, 0.4);
+}
+
+.thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--paper-deep);
+}
+
+.thumbImage {
+  object-fit: cover;
+}
+
+.noCover {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 90% at 0% 0%, rgba(176, 141, 87, 0.35), transparent 70%),
+    var(--night);
+}
+
+.rowMain {
+  min-width: 0;
+}
+
+.rowTitle {
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.rowTitle a:hover {
+  color: var(--gold-deep);
+}
+
+.rowSlug {
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowActions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .row {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+    padding-right: 14px;
+  }
+
+  .rowActions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ------------------------------------------------------------------- Editor */
+.wide {
+  max-width: 1280px;
+}
+
+.editorTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 20px;
+  margin-top: 22px;
+}
+
+.back {
+  font-size: 13px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.editorHeading {
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: 28px;
+  margin-top: 18px;
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+.main {
+  padding: 28px;
+  border: 1px solid rgba(15, 27, 49, 0.06);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+
+.side {
+  position: sticky;
+  top: 20px;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.counter {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.titleInput {
+  min-height: 60px;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-variant-numeric: lining-nums;
+}
+
+.excerpt {
+  min-height: 90px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* "flycelesta.in/blog/" then the editable part, inside one input-like box */
+.slugField {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  padding-left: 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s,
+    background-color 0.3s;
+}
+
+.slugField:focus-within {
+  border-color: var(--gold);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(176, 141, 87, 0.14);
+}
+
+.slugField span {
+  flex: none;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.slugField input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding-right: 16px;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+}
+
+.slugField[data-invalid],
+.writer[data-invalid] {
+  border-color: #b4442f;
+}
+
+.tabs {
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--paper);
+}
+
+.tabs button {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.tabs button[aria-pressed="true"] {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 2px 8px -4px rgba(15, 27, 49, 0.3);
+}
+
+.writer {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.writer:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(176, 141, 87, 0.14);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.toolGroup {
+  display: flex;
+  gap: 2px;
+}
+
+.toolGroup + .toolGroup {
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.tool {
+  min-width: 36px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.tool:hover:not(:disabled) {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.tool:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.tool em {
+  font-size: 17px;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  min-height: 460px;
+  padding: 20px 22px;
+  border: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1.75;
+  outline: none;
+  resize: vertical;
+}
+
+/* Kept in the form (so it is sent) but out of sight while previewing */
+.textarea[hidden] {
+  display: none;
+}
+
+.preview {
+  min-height: 460px;
+  padding: 28px clamp(20px, 4vw, 48px);
+  background: var(--paper);
+}
+
+.previewEmpty {
+  color: var(--muted);
+}
+
+.help {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.help summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.help summary:hover {
+  color: var(--ink);
+}
+
+.help p {
+  margin-top: 8px;
+}
+
+.help dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 6px 18px;
+  margin-top: 8px;
+}
+
+.help dl div {
+  display: flex;
+  gap: 10px;
+}
+
+.help dt {
+  flex: none;
+}
+
+.help code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--paper);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+/* Side panels */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid rgba(15, 27, 49, 0.06);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+
+.panelTitle {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 0;
+}
+
+.options legend {
+  margin-bottom: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s;
+}
+
+.option:has(input:checked) {
+  border-color: var(--gold);
+  background: rgba(176, 141, 87, 0.08);
+}
+
+.option input {
+  margin-top: 4px;
+  accent-color: var(--ink);
+}
+
+.option span {
+  display: flex;
+  flex-direction: column;
+}
+
+.option strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.option small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.save {
+  margin-top: 0;
+  width: 100%;
+}
+
+.progress {
+  min-height: 1.6em;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.progress:empty {
+  display: none;
+}
+
+.viewLink {
+  width: fit-content;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--gold);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.viewLink:hover {
+  color: var(--gold-deep);
+}
+
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: 16 / 9;
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  text-align: center;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s;
+}
+
+.drop:hover:not(:disabled),
+.drop[data-dragging] {
+  border-color: var(--gold);
+  background: rgba(176, 141, 87, 0.08);
+}
+
+.drop:disabled {
+  cursor: progress;
+}
+
+.drop strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.drop small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.coverFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--paper-deep);
+}
+
+.coverImage {
+  object-fit: cover;
+}
+
+.coverActions {
+  display: flex;
+  gap: 8px;
+}
+
+.coverActions button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Delete, under the editor */
+.danger {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid rgba(180, 68, 47, 0.25);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+
+.danger .hint {
+  margin-top: 4px;
+}
+
+.deleteButton {
+  padding: 11px 20px;
+  border: 1px solid #b4442f;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #b4442f;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: #b4442f;
+  color: var(--white);
+}
+
+.deleteButton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+@media (max-width: 960px) {
+  .editor {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .main {
+    padding: 18px;
+  }
+
+  .slugField span {
+    display: none;
+  }
+}

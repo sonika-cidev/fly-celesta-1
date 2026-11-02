@@ -1,5 +1,5 @@
 // Site navigation, following the client's sitemap:
-// Home · Services (5) · About (Company, Career) · Fleet (Business Jets, Helicopters, Turboprops) · Contact.
+// Home · Services (5) · About (Company, Career, FAQs) · Fleet (Business Jets, Helicopters, Turboprops) · Blog · Contact.
 // Kept free of image imports because the header is a client component.
 
 export type NavChild = { label: string; href: string; note: string };
@@ -34,6 +34,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "Company", href: "/about", note: "Our story, mission and values" },
       { label: "Career", href: "/about/career", note: "Join the Fly Celesta team" },
+      { label: "FAQs", href: "/faq", note: "Answers to common questions" },
     ],
   },
   {
@@ -41,5 +42,6 @@ export const navigation: NavItem[] = [
     href: "/fleet",
     children: FLEET_SECTIONS.map((f) => ({ label: f.label, href: `/fleet#${f.id}`, note: f.note })),
   },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];

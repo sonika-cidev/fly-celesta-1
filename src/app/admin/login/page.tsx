@@ -18,9 +18,9 @@ export default async function LoginPage() {
       <div className={styles.loginCard}>
         <Logo width={150} />
         <h1 className={`serif ${styles.loginTitle}`}>
-          Inquiry <em>inbox</em>
+          Admin <em>panel</em>
         </h1>
-        <p className={styles.loginText}>Sign in to view enquiries and charter requests sent from the website.</p>
+        <p className={styles.loginText}>Sign in to view enquiries and charter requests from the website, and to manage the blog.</p>
         {passwordStatus === "ok" ? (
           <LoginForm />
         ) : passwordStatus === "too-short" ? (

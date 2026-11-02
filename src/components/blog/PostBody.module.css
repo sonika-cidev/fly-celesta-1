@@ -1,0 +1,112 @@
+/* Article typography: light sans text with serif headings, as in the rest of the site */
+.body {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  overflow-wrap: break-word;
+}
+
+.body > * + * {
+  margin-top: 1.15em;
+}
+
+.body h2 {
+  margin-top: 1.9em;
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+  font-weight: 400;
+  font-size: clamp(32px, 3.4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.body h3 {
+  margin-top: 1.6em;
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+  font-weight: 500;
+  font-size: clamp(25px, 2.4vw, 30px);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body h2 + *,
+.body h3 + * {
+  margin-top: 0.55em;
+}
+
+.body strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.body a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--gold);
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+
+.body a:hover {
+  color: var(--gold-deep);
+  border-color: var(--gold-deep);
+}
+
+.body ul,
+.body ol {
+  padding-left: 1.3em;
+}
+
+.body li + li {
+  margin-top: 0.45em;
+}
+
+.body li::marker {
+  color: var(--gold);
+}
+
+.body blockquote {
+  margin-block: 1.8em;
+  padding: 4px 0 4px clamp(20px, 3vw, 32px);
+  border-left: 2px solid var(--gold);
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.body blockquote p + p {
+  margin-top: 0.5em;
+}
+
+.body figure {
+  margin-block: 2em;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  background: var(--paper-deep);
+}
+
+.body hr {
+  height: 1px;
+  margin-block: 2.4em;
+  border: 0;
+  background: var(--line-strong);
+}
+
+@media (max-width: 600px) {
+  .body {
+    font-size: 17px;
+  }
+}
