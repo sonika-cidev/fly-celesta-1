@@ -2,8 +2,13 @@ import { Reveal } from "@/components/motion/Reveal";
 import type { Service } from "@/data/services";
 import styles from "./ServiceOverview.module.css";
 
-/** Service page body: the story on the left, what's included on the right. */
-export function ServiceOverview({ service }: { service: Service }) {
+type Overview = Pick<Service, "title" | "details" | "offerings"> & {
+  /** Cities and destinations, shown under the story (the state pages). */
+  places?: string[];
+};
+
+/** Service page body: the story on the left, what's included on the right. Also used by the state pages. */
+export function ServiceOverview({ service, placesLabel = "Places we fly" }: { service: Overview; placesLabel?: string }) {
   const [lead, ...rest] = service.details;
   return (
     <section className={styles.overview} aria-label={`${service.title} overview`}>
@@ -23,6 +28,16 @@ export function ServiceOverview({ service }: { service: Service }) {
               <p className={styles.body}>{paragraph}</p>
             </Reveal>
           ))}
+          {service.places && (
+            <Reveal delay={0.24} className={styles.places}>
+              <h2 className={styles.placesLabel}>{placesLabel}</h2>
+              <ul>
+                {service.places.map((place) => (
+                  <li key={place}>{place}</li>
+                ))}
+              </ul>
+            </Reveal>
+          )}
         </div>
 
         <Reveal delay={0.12} y={30} className={styles.card}>

@@ -7,19 +7,23 @@ import { ValueCards } from "@/components/sections/About";
 import { FormSection } from "@/components/sections/FormSection";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { career } from "@/data/site";
+import { pageMetadata } from "@/lib/seo";
 import styles from "./career.module.css";
 
-export const metadata: Metadata = {
-  title: "Career",
-  description: "Careers at Fly Celesta — work alongside ex-military aviators and civil aviation professionals. Send us your application.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Careers in Aviation, Bengaluru",
+  description:
+    "Aviation careers at Fly Celesta, Bengaluru — work alongside ex-military aviators and civil aviation professionals on helicopter and private jet operations.",
+  path: "/about/career",
+  keywords: ["aviation jobs Bengaluru", "helicopter pilot jobs", "aviation careers India"],
+});
 
 export default function CareerPage() {
   return (
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "About", href: "/about" }, { label: "Career" }]}
-        label="Career"
+        label="Aviation careers · Bengaluru"
         title={["Build your career", <em key="t">in the skies.</em>]}
         lede={career.lede}
         image={careerHero}

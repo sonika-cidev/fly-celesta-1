@@ -7,14 +7,18 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import type { PostPage, PostSummary } from "@/lib/blog";
 import { pageParam } from "@/lib/pagination";
+import { pageMetadata } from "@/lib/seo";
 import { listLivePosts } from "@/lib/server/blog";
 import { StoreUnavailableError } from "@/lib/server/store";
 import styles from "./blog.module.css";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description: "Travel ideas, aviation insight and news from Fly Celesta — private jet and helicopter charter from Bengaluru, India.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Blog — Helicopter & Private Jet Travel",
+  description:
+    "Helicopter joyrides, private jet travel tips and aviation news from Fly Celesta — helicopter and private jet services across Kerala, Karnataka and Tamil Nadu.",
+  path: "/blog",
+  keywords: ["helicopter travel blog", "private jet travel India", "aviation blog India"],
+});
 
 // The first page leads with one featured article over a 3 × 3 grid; later pages are 3 × 3
 const FIRST_PAGE = 10;
@@ -42,7 +46,7 @@ export default async function BlogPage(props: PageProps<"/blog">) {
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Blog" }]}
-        label="Blog"
+        label="Helicopter & private jet travel blog"
         title={["Notes from", <em key="t">the skies.</em>]}
         lede="Travel ideas, aviation insight and news from the Fly Celesta team — from helicopter getaways to buying your first aircraft."
       />

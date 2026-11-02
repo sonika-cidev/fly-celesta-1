@@ -47,6 +47,35 @@
   color: var(--muted);
 }
 
+/* Cities and destinations (state pages) */
+.places {
+  margin-top: 32px;
+}
+
+.placesLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.places ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  list-style: none;
+}
+
+.places li {
+  padding: 7px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
 .card {
   padding: clamp(28px, 3.4vw, 44px);
   border-radius: var(--radius-xl);

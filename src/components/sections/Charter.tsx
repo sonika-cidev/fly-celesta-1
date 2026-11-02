@@ -8,7 +8,7 @@ export function Charter({ overlap = false }: { overlap?: boolean }) {
     <FormSection
       overlap={overlap}
       id="request"
-      label="Request a charter"
+      label="Book a helicopter or private jet"
       title={["Plan your", <em key="r">next flight.</em>]}
       lede="Share your itinerary and our charter desk will come back with tailored aircraft options and a quote."
       image={clouds}

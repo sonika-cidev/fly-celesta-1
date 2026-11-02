@@ -7,15 +7,25 @@ export const site = {
   url: "https://flycelesta.in",
   email: "sales@flycelesta.in",
   phone: "+ 91 90 72 789 789",
-  phoneHref: "tel:+919188037000",
+  phoneHref: "tel:+919072789789",
   address: ["Prestige Shantiniketan, 10th Floor, Tower B", "ITPL Main Rd, Whitefield", "Bengaluru 560048, Karnataka, India"],
+  /** The same address in parts, for search engines' structured data. */
+  postalAddress: {
+    streetAddress: "Prestige Shantiniketan, 10th Floor, Tower B, ITPL Main Rd, Whitefield",
+    addressLocality: "Bengaluru",
+    addressRegion: "Karnataka",
+    postalCode: "560048",
+    addressCountry: "IN",
+  },
+  /** States with their own helicopter-services page; named in titles, copy and structured data. */
+  states: ["Kerala", "Karnataka", "Tamil Nadu"],
 };
 
 export const about = {
   statement:
     "We are a dynamic aviation company committed to redefining air travel and aviation services in India and beyond.",
   body: [
-    "We specialise in helicopter and fixed-wing operations — charter flights, medical evacuations, aerial surveys and regional connectivity.",
+    "We specialise in helicopter and fixed-wing operations across Kerala, Karnataka, Tamil Nadu and beyond — private jet and helicopter charters, joyrides, shuttles, air ambulance flights, flower drops, aerial surveys and regional connectivity.",
     "Our team of seasoned professionals, including ex-military aviators and civil aviation veterans, holds every flight to the highest standards of safety, reliability and client satisfaction.",
   ],
   // Drafted from the "Our Story" copy on flycelesta.in — confirm the final wording with the client.
@@ -30,11 +40,13 @@ export const about = {
     { title: "Client-centric", body: "Our clients are at the core of everything we do — every solution is tailored to them." },
   ],
   sectors: [
-    "Helicopter Operations",
-    "Fixed-Wing Charters",
-    "Medical Evacuation",
+    "Helicopter Charters",
+    "Private Jets on Rent",
+    "Helicopter Joyrides",
+    "Air Ambulance",
+    "Flower Drops",
     "Aerial Surveys",
-    "Regional Connectivity",
+    "Aircraft Sales",
     "Aircraft Management",
   ],
 };

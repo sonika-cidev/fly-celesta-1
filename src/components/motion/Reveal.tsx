@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
-const tags = { div: motion.div, li: motion.li, p: motion.p, header: motion.header } as const;
+// span: inside a heading (a heading may only contain inline content)
+const tags = { div: motion.div, li: motion.li, p: motion.p, header: motion.header, span: motion.span } as const;
 
 type RevealProps = {
   children: ReactNode;

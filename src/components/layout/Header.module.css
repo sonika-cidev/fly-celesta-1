@@ -121,6 +121,14 @@
   transition-delay: 0s;
 }
 
+/* A long list (Services) splits into two columns, filled top to bottom */
+.dropdownList:has(> li:nth-child(7)) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(270px, 1fr));
+  grid-template-rows: repeat(5, auto);
+  grid-auto-flow: column;
+}
+
 .dropdownList {
   min-width: 300px;
   padding: 8px;

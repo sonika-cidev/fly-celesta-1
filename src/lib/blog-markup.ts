@@ -155,13 +155,17 @@ export function plainText(source: string) {
 /** About 200 words a minute, at least one. */
 export const readingMinutes = (source: string) => Math.max(1, Math.round(plainText(source).split(/\s+/).filter(Boolean).length / 200));
 
-/** The opening paragraph, shortened to a sentence or two — used when a post has no excerpt of its own. */
-export function excerptFrom(source: string, max = 200) {
-  const first = parseBlocks(source).find((block) => block.type === "paragraph");
-  const text = first ? inlineText(first.children).trim() : "";
+/** Text cut at a word boundary to at most `max` characters (plus "…"). */
+export function shorten(text: string, max: number) {
   if (text.length <= max) return text;
   const cut = text.slice(0, max + 1);
   return `${cut.slice(0, Math.max(cut.lastIndexOf(" "), max * 0.6)).replace(/[\s,;:.–—-]+$/, "")}…`;
+}
+
+/** The opening paragraph, shortened to a sentence or two — used when a post has no excerpt of its own. */
+export function excerptFrom(source: string, max = 200) {
+  const first = parseBlocks(source).find((block) => block.type === "paragraph");
+  return shorten(first ? inlineText(first.children).trim() : "", max);
 }
 
 /** The post's own excerpt, or the opening of the article. */

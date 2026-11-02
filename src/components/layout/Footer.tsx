@@ -5,7 +5,7 @@ import { Swoosh } from "@/components/motion/Swoosh";
 import { ButtonInner, buttonClass } from "@/components/ui/Button";
 import { RequestCharterLink } from "@/components/ui/RequestCharterLink";
 import { RouteLink } from "@/components/ui/RouteLink";
-import { SERVICE_PAGES } from "@/data/navigation";
+import { REGION_PAGES, SERVICE_PAGES } from "@/data/navigation";
 import { site } from "@/data/site";
 import styles from "./Footer.module.css";
 
@@ -40,7 +40,10 @@ export function Footer() {
         <div className={styles.grid}>
           <div className={styles.brand}>
             <Logo variant="light" width={220} />
-            <p>Charters, aircraft sales, aviation consultancy and unmanned systems — across helicopter and fixed-wing operations.</p>
+            <p>
+              Helicopter services across Kerala, Karnataka and Tamil Nadu — private jets on rent, joyrides, shuttles, air
+              ambulance and flower drops, plus helicopters and private jets for sale.
+            </p>
           </div>
 
           <nav className={styles.column} aria-label="Services">
@@ -50,6 +53,16 @@ export function Footer() {
                 {service.title}
               </RouteLink>
             ))}
+          </nav>
+
+          <nav className={styles.column} aria-label="Helicopter services">
+            <p className={styles.heading}>Helicopter services</p>
+            {REGION_PAGES.map((region) => (
+              <RouteLink key={region.slug} href={`/helicopter-services/${region.slug}`}>
+                Helicopter services in {region.name}
+              </RouteLink>
+            ))}
+            <RouteLink href="/helicopter-services">All helicopter services</RouteLink>
           </nav>
 
           <nav className={styles.column} aria-label="Company">

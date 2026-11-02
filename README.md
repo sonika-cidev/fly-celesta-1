@@ -15,8 +15,9 @@ Follows the client's sitemap:
 
 | Page | Route |
 | --- | --- |
-| Home | `/` — hero, services, about, fleet carousel, charter deals, charter request form |
-| Services | `/services` and one page per service: `/services/charter-services`, `/aircraft-for-sale`, `/aircraft-wanted`, `/aviation-consultancy`, `/unmanned-aviation-systems` |
+| Home | `/` — hero, services, helicopter services, about, fleet carousel, charter deals, blog, FAQs, charter request form |
+| Services | `/services` and one page per service: `/services/charter-services`, `/helicopter-joyrides`, `/helicopter-shuttles`, `/air-ambulance`, `/helicopter-flower-drop`, `/aircraft-for-sale`, `/aircraft-wanted`, `/aviation-consultancy`, `/unmanned-aviation-systems` |
+| Helicopter services | `/helicopter-services` and one page per state: `/helicopter-services/kerala`, `/karnataka`, `/tamil-nadu` |
 | About | `/about` (Company) and `/about/career` (Career) |
 | Fleet | `/fleet` — Business Jets, Helicopters and Turboprops (`#business-jets`, `#helicopters`, `#turboprops`) |
 | Blog | `/blog` (newest article featured, then 9 per page) and one page per article: `/blog/<address>` |
@@ -67,6 +68,31 @@ Articles are written and published from the admin panel: sign in at **`/admin`**
 
 The questions and answers are in `src/data/faq.ts`, grouped by topic. `featured: true` also shows a question on the
 home page. The `/faq` page includes `FAQPage` structured data for search engines.
+
+## SEO
+
+Target searches: helicopter services in Kerala, Karnataka and Tamil Nadu; private jets on rent; helicopters and
+private jets for sale; helicopter joyrides (Kerala, Tamil Nadu); helicopter shuttles; air ambulance; flower drops.
+
+- **A page for each search** — the four helicopter services (`src/data/services.ts`, `group: "helicopter"`) and a
+  page per state (`src/data/regions.ts`); charter services and aircraft for sale carry "private jets on rent" and
+  "helicopters / private jets for sale".
+- **Titles and descriptions** — every page sets its own through `pageMetadata()` in `src/lib/seo.ts`: title, description
+  (≤ 160 characters), canonical address, Open Graph and Twitter tags with a share image (`og-default.jpg`, 1200 × 630,
+  or the page's own photo). Service and state pages keep theirs in their data (`seo`).
+- **Headings** — one `h1` per page. The small label above each page title is part of the `h1`, so it carries the
+  page's search phrase while the large title stays as designed.
+- **Structured data** (JSON-LD) — `LocalBusiness` and `WebSite` on the home page; `Service` on service and state pages;
+  `BreadcrumbList` on every inner page; `FAQPage` on `/faq`; `BlogPosting` on articles.
+- **Crawling** — `/sitemap.xml` (every page plus published articles, updated as posts are published) and
+  `/robots.txt` pointing to it; `lang="en-IN"`.
+- **Internal links** — the Services menu, the home page's helicopter-services section, a footer column for the states,
+  links to the states and other services at the end of each service page, and service-specific FAQs on each page.
+- Blog posts: the editor suggests titles under 60 characters and excerpts under 160; longer ones are shortened in search
+  results automatically.
+
+After launch, add the site to Google Search Console and submit `https://flycelesta.in/sitemap.xml`, and keep the
+company's name, address and phone number identical on Google Business Profile and directories.
 
 ## Environment variables
 
@@ -158,7 +184,10 @@ src/
 - **Copy to confirm with the client:** the five service pages (Unmanned Aviation Systems is new), the career page and
   the mission/vision wording were drafted from the current flycelesta.in content. The FAQ answers (`src/data/faq.ts`)
   were drafted from that copy and general charter practice — confirm them too, especially pricing, documents and
-  helicopter landing permissions.
+  helicopter landing permissions. Likewise the helicopter joyride, shuttle, air ambulance and flower drop pages and the
+  Kerala, Karnataka and Tamil Nadu pages, including the places they name.
+- **Phone number:** the call links now dial the number shown on the site (+91 90727 89789); until then they dialled
+  the earlier number (+91 91880 37000). Confirm the number with the client.
 - **Fleet specifications** are as published on flycelesta.in and indicative.
 - **Photography** is from Wikimedia Commons, mostly under CC BY / CC BY-SA, which require visible credit. The footer no
   longer lists credits, so replace these photos with ones the client owns or licenses, or publish the credits again —

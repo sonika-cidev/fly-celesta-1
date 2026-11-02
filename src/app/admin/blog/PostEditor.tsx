@@ -197,7 +197,17 @@ export function PostEditor({ id, initial, initialState = "draft", created = fals
       <input type="hidden" name="coverImage" value={values.coverImage} />
 
       <div className={styles.main}>
-        <Field id={fieldId("title")} label="Title" error={errors.title}>
+        <Field
+          id={fieldId("title")}
+          label="Title"
+          error={errors.title}
+          hint="Search results show about the first 60 characters — put the main search phrase (e.g. “helicopter joyride in Kochi”) early."
+          aside={
+            <span className={styles.counter} data-over={values.title.length > 60 ? "" : undefined}>
+              {values.title.length}/60
+            </span>
+          }
+        >
           <input
             id={fieldId("title")}
             name="title"
@@ -207,7 +217,7 @@ export function PostEditor({ id, initial, initialState = "draft", created = fals
             placeholder="A title that says what the article is about"
             autoComplete="off"
             aria-invalid={errors.title ? true : undefined}
-            aria-describedby={describe("title", false)}
+            aria-describedby={describe("title")}
             className={`${admin.input} ${styles.titleInput}`}
           />
         </Field>
@@ -302,7 +312,7 @@ export function PostEditor({ id, initial, initialState = "draft", created = fals
           id={fieldId("excerpt")}
           label="Excerpt (optional)"
           error={errors.excerpt}
-          hint="Shown on the blog page and in search results. Leave empty to use the opening of the article."
+          hint="Shown on the blog page and as the description in search results, which show about the first 160 characters. Leave empty to use the opening of the article."
           aside={
             <span className={styles.counter}>
               {values.excerpt.length}/{POST_LIMITS.excerpt}

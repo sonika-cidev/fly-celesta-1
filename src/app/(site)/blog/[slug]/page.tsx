@@ -12,7 +12,8 @@ import { RequestCharterLink } from "@/components/ui/RequestCharterLink";
 import { RouteLink } from "@/components/ui/RouteLink";
 import { site } from "@/data/site";
 import { formatPostDate } from "@/lib/blog";
-import { readingMinutes, summaryOf } from "@/lib/blog-markup";
+import { readingMinutes, shorten, summaryOf } from "@/lib/blog-markup";
+import { breadcrumbSchema, DEFAULT_SHARE_IMAGE } from "@/lib/seo";
 import { getLivePost } from "@/lib/server/blog";
 import { StoreUnavailableError } from "@/lib/server/store";
 import styles from "./article.module.css";
@@ -31,23 +32,25 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const post = await findPost((await params).slug);
   if (!post) return { title: "Article not found" };
 
-  const description = summaryOf(post);
+  // Search results show about 160 characters of description and 60 of title; a long title goes without " — Fly Celesta"
+  const description = shorten(summaryOf(post), 158);
   const url = `${site.url}/blog/${post.slug}`;
   return {
-    title: post.title,
+    title: post.title.length > 46 ? { absolute: post.title } : post.title,
     description,
     alternates: { canonical: url },
     openGraph: {
       type: "article",
       url,
       siteName: site.name,
+      locale: "en_IN",
       title: post.title,
       description,
       publishedTime: post.publishedAt?.toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
-      images: post.coverImage ? [{ url: `${site.url}${post.coverImage}`, alt: post.coverAlt }] : undefined,
+      images: post.coverImage ? [{ url: `${site.url}${post.coverImage}`, alt: post.coverAlt }] : [DEFAULT_SHARE_IMAGE],
     },
-    twitter: { card: post.coverImage ? "summary_large_image" : "summary" },
+    twitter: { card: "summary_large_image", title: post.title, description },
   };
 }
 
@@ -171,6 +174,7 @@ export default async function ArticlePage({ params }: PageProps<"/blog/[slug]">)
           publisher: { "@type": "Organization", name: site.legalName, url: site.url },
         }}
       />
+      <JsonLd data={breadcrumbSchema([{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: post.title }])} />
     </>
   );
 }

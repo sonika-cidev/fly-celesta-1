@@ -4,18 +4,22 @@ import { PageHero } from "@/components/layout/PageHero";
 import { About } from "@/components/sections/About";
 import { CtaBand } from "@/components/sections/CtaBand";
 import { company } from "@/data/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Company",
-  description: "Fly Celesta Private Limited — a Bengaluru-based aviation company. Our story, mission, vision and values.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Helicopter & Private Jet Company in Bengaluru",
+  description:
+    "Fly Celesta is a Bengaluru aviation company providing helicopter services and private jets across Kerala, Karnataka and Tamil Nadu. Our story and values.",
+  path: "/about",
+  keywords: ["aviation company Bengaluru", "helicopter company Karnataka", "private jet company India"],
+});
 
 export default function CompanyPage() {
   return (
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "About" }, { label: "Company" }]}
-        label="About us"
+        label="Helicopter & private jet company · Bengaluru"
         title={["Our", <em key="t">company.</em>]}
         lede={company.lede}
         image={eiger}

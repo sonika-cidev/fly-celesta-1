@@ -6,8 +6,12 @@ import { site } from "@/data/site";
 import { FaqList } from "./FaqList";
 import styles from "./Faq.module.css";
 
-/** "Good to know" — the most-asked questions beside a heading, with a link to the full FAQ page. */
-export function Faq({ items }: { items: FaqItem[] }) {
+/**
+ * "Good to know" — questions beside a heading, with a link to the full FAQ page: the most-asked ones on the
+ * home page, the relevant ones on service and state pages (`current`: that page, so answers don't link to it).
+ */
+export function Faq({ items, current }: { items: FaqItem[]; current?: string }) {
+  if (items.length === 0) return null;
   return (
     <section id="faq" className={styles.faq} aria-labelledby="faq-title">
       <div className={`container ${styles.layout}`}>
@@ -33,7 +37,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
             </div>
           </Reveal>
         </div>
-        <FaqList items={items} />
+        <FaqList items={current ? items.map((item) => (item.link?.href === current ? { ...item, link: undefined } : item)) : items} />
       </div>
     </section>
   );

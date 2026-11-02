@@ -1,9 +1,9 @@
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { services } from "@/data/services";
+import { servicesIn } from "@/data/services";
 import { ServiceCard } from "./ServiceCard";
 import styles from "./Services.module.css";
 
-/** The five services as editorial cards. The services page supplies its own heading. */
+/** The five main services as editorial cards (the helicopter services follow in their own section). The services page supplies its own heading. */
 export function Services({ withHeading = true }: { withHeading?: boolean }) {
   return (
     <section
@@ -16,7 +16,7 @@ export function Services({ withHeading = true }: { withHeading?: boolean }) {
         {withHeading && (
           <SectionHeading
             id="services-title"
-            label="Our services"
+            label="Private jets · Helicopters · Aircraft sales"
             title={
               <>
                 Every journey,
@@ -34,7 +34,7 @@ export function Services({ withHeading = true }: { withHeading?: boolean }) {
         )}
 
         <ol className={styles.grid}>
-          {services.map((service, i) => (
+          {servicesIn("core").map((service, i) => (
             <ServiceCard key={service.slug} service={service} index={i} />
           ))}
         </ol>

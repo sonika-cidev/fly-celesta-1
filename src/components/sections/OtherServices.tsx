@@ -1,9 +1,10 @@
 import { Reveal } from "@/components/motion/Reveal";
 import { RouteLink } from "@/components/ui/RouteLink";
 import { SERVICE_PAGES } from "@/data/navigation";
+import { RegionLinks } from "./HelicopterServices";
 import styles from "./OtherServices.module.css";
 
-/** Links to the remaining services, closing each service page. */
+/** Links to the remaining services and to the state pages, closing each service page. */
 export function OtherServices({ current }: { current: string }) {
   const others = SERVICE_PAGES.filter((s) => s.slug !== current);
   return (
@@ -17,7 +18,7 @@ export function OtherServices({ current }: { current: string }) {
         </Reveal>
         <ul className={styles.list}>
           {others.map((service, i) => (
-            <Reveal as="li" key={service.slug} delay={i * 0.06}>
+            <Reveal as="li" key={service.slug} delay={(i % 4) * 0.06}>
               <RouteLink href={`/services/${service.slug}`} className={styles.card}>
                 <span className={`serif ${styles.title}`}>{service.title}</span>
                 <span className={styles.note}>{service.note}</span>
@@ -30,6 +31,7 @@ export function OtherServices({ current }: { current: string }) {
             </Reveal>
           ))}
         </ul>
+        <RegionLinks />
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { capitalizeWords, emailError, formatPhone, messageError, nameError, phon
 export const INQUIRY_TOPICS = [
   "General enquiry",
   "Charter services",
+  "Flower drop",
   "Aircraft for sale",
   "Aircraft wanted",
   "Aviation consultancy",
@@ -16,6 +17,7 @@ export type InquiryTopic = (typeof INQUIRY_TOPICS)[number];
 export const TOPIC_PROMPTS: Record<InquiryTopic, string> = {
   "General enquiry": "How can we help?",
   "Charter services": "Your route, dates and number of passengers…",
+  "Flower drop": "The occasion, the location, the date and time, and the flowers you have in mind…",
   "Aircraft for sale": "The aircraft you're looking for, your budget and timeline…",
   "Aircraft wanted": "Your aircraft's make, model, year, total hours and location…",
   "Aviation consultancy": "Tell us about your aircraft, operation or project…",

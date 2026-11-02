@@ -205,6 +205,11 @@
   color: var(--muted);
 }
 
+/* Longer than search results show: a nudge, not an error */
+.counter[data-over] {
+  color: #a8681d;
+}
+
 .titleInput {
   min-height: 60px;
   font-family: var(--font-serif);

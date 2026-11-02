@@ -3,19 +3,23 @@ import contactImage from "@/assets/images/services/acquisition.jpg";
 import { InquiryForm } from "@/components/forms/InquiryForm";
 import { PageHero } from "@/components/layout/PageHero";
 import { FormSection } from "@/components/sections/FormSection";
+import { site } from "@/data/site";
 import { INQUIRY_TOPICS } from "@/lib/inquiry";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact Fly Celesta in Bengaluru — call + 91 90 72 789 789, email sales@flycelesta.in or send us a message.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Contact Us — Book a Helicopter or Private Jet",
+  description: `Book a helicopter or private jet: call ${site.phone}, email ${site.email} or send a message. Serving Kerala, Karnataka & Tamil Nadu from Bengaluru.`,
+  path: "/contact",
+  keywords: ["book a helicopter", "book a private jet", "helicopter booking Bengaluru", "Fly Celesta contact"],
+});
 
 export default function ContactPage() {
   return (
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
-        label="Contact"
+        label="Book a helicopter or private jet"
         title={["Get in", <em key="t">touch.</em>]}
         lede="Reach out to our team — we're here to help with charters, aircraft sales and every aviation enquiry."
       />

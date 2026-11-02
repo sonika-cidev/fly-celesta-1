@@ -3,13 +3,16 @@ import type { ReactNode } from "react";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { LineRise } from "@/components/motion/LineRise";
 import { Reveal } from "@/components/motion/Reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { RouteLink } from "@/components/ui/RouteLink";
+import { breadcrumbSchema } from "@/lib/seo";
 import styles from "./PageHero.module.css";
 
 type Crumb = { label: string; href?: string };
 
 type PageHeroProps = {
   crumbs: Crumb[];
+  /** Small line above the title. It is part of the page's h1, so it carries the page's main search phrase. */
   label: string;
   /** Title lines; use <em> for the champagne italic accent. */
   title: ReactNode[];
@@ -45,17 +48,15 @@ export function PageHero({ crumbs, label, title, lede, image, imageAlt = "", ima
         </Reveal>
 
         <div className={styles.head}>
-          <div>
-            <Reveal y={12} delay={0.05}>
-              <p className={styles.label}>
-                <span className={styles.dot} aria-hidden="true" />
-                {label}
-              </p>
+          <h1 id="page-title" className={styles.heading}>
+            <Reveal as="span" y={12} delay={0.05} className={styles.label}>
+              <span className={styles.dot} aria-hidden="true" />
+              {label}
             </Reveal>
-            <h1 id="page-title" className={styles.title}>
+            <span className={styles.title}>
               <LineRise immediate delay={0.15} lines={title} />
-            </h1>
-          </div>
+            </span>
+          </h1>
           <Reveal delay={0.45} y={16} className={styles.lede}>
             {lede}
           </Reveal>
@@ -77,6 +78,7 @@ export function PageHero({ crumbs, label, title, lede, image, imageAlt = "", ima
           </ImageReveal>
         )}
       </div>
+      <JsonLd data={breadcrumbSchema(crumbs)} />
     </section>
   );
 }

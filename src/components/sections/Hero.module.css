@@ -13,6 +13,15 @@
   text-align: center;
 }
 
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
 .label {
   display: inline-flex;
   align-items: center;
@@ -33,6 +42,7 @@
 }
 
 .title {
+  display: block;
   margin-top: 26px;
   font-family: var(--font-serif);
   font-weight: 300;
